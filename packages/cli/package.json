@@ -1,0 +1,16 @@
+{
+  "name": "evaliphy",
+  "version": "0.0.1",
+  "type": "module",
+  "bin": {
+    "evaliphy": "./dist/bin.js"
+  },
+  "dependencies": {
+    "@evaliphy/core": "workspace:*",
+    "commander": "^12.1.0",
+    "tsx": "^4.21.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && chmod +x dist/bin.js"
+  }
+}
