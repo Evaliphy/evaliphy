@@ -1,3 +1,4 @@
+import { MessageSquarePlus } from "lucide-react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
@@ -62,14 +63,24 @@ export default function RootLayout({
                 </Link>
               </nav>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <a
+                href="https://forms.gle/5CQGzonT1XUUHCJu6"
+                target="_blank"
+                rel="noreferrer"
+                className="hidden sm:flex items-center gap-2 rounded-full bg-zinc-900 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+              >
+                <MessageSquarePlus className="h-4 w-4" />
+                <span>Feedback</span>
+              </a>
               <a
                 href="https://github.com/priyanshus/evaliphy"
                 target="_blank"
                 rel="noreferrer"
-                className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
+                className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-1.5 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50"
               >
-                GitHub
+                <span className="hidden sm:inline">Star on GitHub</span>
+                <span className="sm:hidden">Star</span>
               </a>
             </div>
           </div>
