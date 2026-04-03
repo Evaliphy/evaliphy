@@ -1,17 +1,12 @@
 name: Release Beta
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'package.json'
-      - 'packages/**'
   workflow_dispatch:
 
 jobs:
   release:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,19 +28,10 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Bump beta version
+        run: npm version prerelease --preid=beta --no-git-tag-version
+
       - name: Publish Beta
-        run: |
-          # Get current version from package.json
-          VERSION=$(node -p "require('./package.json').version")
-          
-          # Check if version already contains a beta tag
-          if [[ $VERSION != *"beta"* ]]; then
-            # Append beta tag with timestamp for uniqueness in beta releases
-            BETA_VERSION="${VERSION}-beta.$(date +%s)"
-            npm version $BETA_VERSION --no-git-tag-version
-          fi
-          
-          # Publish with beta tag
-          npm publish --tag beta
+        run: npm publish --tag beta
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

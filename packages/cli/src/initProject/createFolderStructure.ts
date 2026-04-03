@@ -31,6 +31,16 @@ import { defineConfig } from 'evaliphy';
 export default defineConfig({
   baseUrl: 'http://localhost:8080',
   testDir: './evals',
+  llmAsJudgeConfig: {
+    model: 'gpt-4o-mini',
+    provider: {
+      type: 'gateway',
+      url: 'https://openrouter.ai/api/v1',
+      apiKey: process.env.OPENROUTER_API_KEY,
+    },
+    promptsDir: './prompts',
+    temperature: 0
+  },
 });
 `,
         'tsconfig.json': JSON.stringify({
