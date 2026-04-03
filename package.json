@@ -16,7 +16,8 @@
     "evaluation"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "homepage": "https://evaliphy.com",
   "bugs": {
