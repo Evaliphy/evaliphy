@@ -67,22 +67,23 @@ import { evaluate, expect } from 'evaliphy';
 
 evaluate('answer quality', async ({ httpClient }) => {
   const query = 'What is your refund policy?';
+  const context = "A detailed text explaining return policy"
 
   // 1. call your RAG application
-  const response = await httpClient.post('/chat', { message: query });
-  const { answer, context } = await response.json();
+  const data = await httpClient.post('/chat', { message: query });
+  const llmReply = await data.json();
 
   // 2. assert the response is relevant to the query
   await expect({
     query,
-    response: answer,
+    response: llmReply.answer,
     context,
-  }).toBeRelevant();
+  }).toBeRelevant(); // default threshold is 0.7
 
   // 3. assert the response is faithful to the retrieved context
   await expect({
     query,
-    response: answer,
+    response: llmReply.answer,
     context,
   }).toBeFaithful({threshold: 0.8});
 });

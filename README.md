@@ -1,8 +1,8 @@
 # Evaliphy (Beta)
 
-> **RAG Evaluation, Without the ML Jargon.**
+> **RAG Testing, Without the ML Jargon.**
 
-The first QA-centric SDK for testing Retrieval-Augmented Generation. Write end-to-end evaluations for your AI pipelines using the exact same workflow you use for Playwright. No prompt engineering required.
+Write end-to-end tests for your AI pipelines using the exact same workflow you use for rest of the products. No prompt engineering required. No ML knowledge required, all you need is basic familiarity of any standing testing framework.
 
 Visit https://evaliphy.com for more details.
 
@@ -13,7 +13,9 @@ Visit https://evaliphy.com for more details.
 
 ```bash
 npm install -g evaliphy
-npx evaliphy init
+npx evaliphy init my-eval-project
+cd my-eval-project
+npm install
 ```
 
 ## If you can write a test, you can evaluate AI.

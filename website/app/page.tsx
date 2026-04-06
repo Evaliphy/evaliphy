@@ -35,7 +35,7 @@ export default async function Home() {
     "name": "Evaliphy",
     "operatingSystem": "Node.js",
     "applicationCategory": "DeveloperApplication",
-    "description": "Evaliphy is the end-to-end RAG evaluation framework for QA engineers. Write assertions in TypeScript, test your real API, get structured reports.",
+    "description": "Evaliphy is the simplest AI testing framework for engineers. Write assertions in TypeScript, test your real API, get structured reports.",
     "offers": {
       "@type": "Offer",
       "price": "0",
@@ -62,9 +62,9 @@ export default async function Home() {
             </div>
 
             <div className="space-y-6">
-              <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 leading-[1.1]">
-                RAG testing for <br />
-                QA engineers.
+              <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-zinc-900 leading-[1.1]">
+                Test Your AI Features <br />
+                Like The Rest Of Your Product
               </h1>
               <p className="text-xl text-zinc-600 leading-relaxed max-w-xl">
                 Evaliphy fits inside your existing test workflow. Assertions,
@@ -109,6 +109,7 @@ export default async function Home() {
               <span className="text-xl font-bold text-zinc-900">Anthropic</span>
               <span className="text-xl font-bold text-zinc-900">OpenRouter</span>
               <span className="text-xl font-bold text-zinc-900">Mistral</span>
+              <span className="text-xl font-bold text-zinc-900">Vercel</span>
             </div>
           </div>
         </div>

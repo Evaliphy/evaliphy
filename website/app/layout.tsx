@@ -111,7 +111,7 @@ export default function RootLayout({
         <footer className="border-t border-zinc-100 py-12">
           <div className="container mx-auto max-w-screen-2xl px-4 md:px-8">
             <p className="text-center text-sm leading-loose text-zinc-500">
-              Built for quality engineers. Evaliphy &copy; {new Date().getFullYear()}
+              Built for Simplicity. Evaliphy &copy; {new Date().getFullYear()}
             </p>
           </div>
         </footer>
