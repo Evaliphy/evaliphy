@@ -18,13 +18,13 @@ evaluate("Return Policy Chat", async ({ httpClient }) => {
   await expect({
     query: sample.query,
     response: data.answer,
-    context: data.retrieved_chunks
+    context: sample.expectedContext
   }).toBeFaithful();
 
   await expect({
     query: sample.query,
     response: data.answer,
-    context: data.retrieved_chunks
+    context: sample.expectedContext
   }).toBeRelevant({threshold:0.7});
 });`;
 
@@ -50,19 +50,36 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/docs/quick-start"
-                className="px-8 py-3 bg-zinc-900 text-white rounded-lg font-medium hover:bg-zinc-800 transition-colors"
+            <div className="flex flex-col space-y-8">
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/docs/quick-start"
+                  className="px-8 py-3 bg-zinc-900 text-white rounded-lg font-medium hover:bg-zinc-800 transition-colors"
+                >
+                  Get Started
+                </Link>
+                <Link
+                  href="https://github.com/priyanshus/evaliphy"
+                  className="px-8 py-3 border border-zinc-200 text-zinc-900 rounded-lg font-medium hover:bg-zinc-50 transition-colors"
+                >
+                  View on GitHub
+                </Link>
+              </div>
+
+              <a
+                href="https://www.producthunt.com/products/evaliphy?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-evaliphy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
               >
-                Get Started
-              </Link>
-              <Link
-                href="https://github.com/priyanshus/evaliphy"
-                className="px-8 py-3 border border-zinc-200 text-zinc-900 rounded-lg font-medium hover:bg-zinc-50 transition-colors"
-              >
-                View on GitHub
-              </Link>
+                <img
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1116079&theme=dark&t=1775371542211"
+                  alt="Evaliphy - E2E RAG testing for QA engineers | No ML overhead | Product Hunt"
+                  width="250"
+                  height="54"
+                  className="w-[250px] h-[54px]"
+                />
+              </a>
             </div>
           </div>
 
