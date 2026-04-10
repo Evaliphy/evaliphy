@@ -1,6 +1,6 @@
 {
   "name": "evaliphy",
-  "version": "1.0.1-beta.8",
+  "version": "1.0.1-beta.9",
   "type": "module",
   "description": "The first QA-centric SDK for testing Retrieval-Augmented Generation (RAG).",
   "main": "./dist/index.mjs",
