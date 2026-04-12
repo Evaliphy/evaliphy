@@ -2,7 +2,25 @@ import { getAllBlogPosts, getBlogPostBySlug } from "@/lib/blog";
 import { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
+import React from "react";
 import remarkGfm from "remark-gfm";
+
+const components = {
+  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
+    const id = props.children?.toString()
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-");
+    return <h2 {...props} id={id} />;
+  },
+  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => {
+    const id = props.children?.toString()
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-");
+    return <h3 {...props} id={id} />;
+  },
+};
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -62,6 +80,7 @@ export default async function BlogPostPage({ params }: Props) {
         <div className="prose prose-zinc max-w-none prose-headings:scroll-mt-20 prose-headings:font-bold prose-a:text-blue-600 prose-a:underline hover:prose-a:text-blue-800 prose-pre:bg-zinc-900 prose-pre:border prose-pre:border-zinc-800">
           <MDXRemote
             source={post.content}
+            components={components}
             options={{
               mdxOptions: {
                 remarkPlugins: [remarkGfm],

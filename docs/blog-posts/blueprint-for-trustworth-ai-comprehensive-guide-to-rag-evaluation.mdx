@@ -30,7 +30,7 @@ A **blueprint for trustworthy AI** starts with the acknowledgment that Large Lan
 
 To bridge this trust gap, we need more than just "vibes-based" testing or manual spot-checking. We need a systematic, repeatable, and auditable way to prove that our AI is behaving as intended. This is where modern evaluation frameworks come into play.
 
-## The Evolution of AI Evaluation: Beyond BLEU and ROUGE
+## The Evolution of AI Evaluation: Beyond [BLEU and ROUGE](https://wandb.ai/ai-team-articles/llm-evaluation/reports/LLM-evaluation-benchmarking-Beyond-BLEU-and-ROUGE--VmlldzoxNTIzMTY0NQ)
 
 Traditional metrics like BLEU (Bilingual Evaluation Understudy) and ROUGE (Recall-Oriented Understudy for Gisting Evaluation) were designed for machine translation and summarization. They work by counting how many words in the AI's response match a "gold standard" human answer. 
 
@@ -74,7 +74,7 @@ Finally, did the AI actually answer the user? Answer Relevance checks if the res
 
 ## Industry Standards: The Shift to LLM-as-a-Judge
 
-The current gold standard for implementing the RAG Triad is a methodology called **LLM-as-a-Judge**. Instead of using rigid math formulas, we use a highly capable "frontier" model (like GPT-4o or Claude 3.5 Sonnet) to act as an automated auditor.
+The current gold standard for implementing the RAG Triad is a methodology called **LLM-as-a-Judge**. Instead of using rigid math formulas, you should use a highly capable "frontier" model to act as an automated auditor.
 
 ### The Evaluation Workflow
 1.  **Collection:** Gather the user query, the retrieved context, and the AI’s response.
@@ -83,7 +83,7 @@ The current gold standard for implementing the RAG Triad is a methodology called
 4.  **Structured Output:** The judge returns a machine-readable format (like JSON) containing a score, a pass/fail status, and the reasoning.
 
 ### Advanced Calibration: The Rogan-Gladen Estimator
-In high-stakes scenarios, raw scores can be misleading. To find the truth, we use the **Rogan-Gladen Estimator**. This statistical tool compares the judge against a "Gold Set" (human-labeled examples) to find its Sensitivity (how well it catches truths) and Specificity (how well it detects lies). This math allows us to report performance with statistically sound confidence intervals, providing a safety net against "false progress" where a model improves at tricking a judge rather than getting smarter.
+In high-stakes scenarios, raw scores can be misleading. To find the truth, you should use the **Rogan-Gladen Estimator**. This statistical tool compares the judge against a "Gold Set" (human-labeled examples) to find its Sensitivity (how well it catches truths) and Specificity (how well it detects lies). This math allows us to report performance with statistically sound confidence intervals, providing a safety net against "false progress" where a model improves at tricking a judge rather than getting smarter.
 
 ---
 
@@ -95,12 +95,12 @@ Understanding *why* these biases happen is critical for any engineer building a 
 
 To maintain the integrity of your evaluations, you must actively identify and mitigate these common biases:
 
-### 1. Position Bias (The "First-is-Best" Problem)
+### 1. Position Bias[^1] (The "First-is-Best" Problem)
 This is a direct side-effect of how models process sequences. LLMs often show a statistically significant preference for the first (or sometimes last) response they see in a comparison, regardless of quality.
 *   **Why it happens:** The model's attention weights can become skewed toward the beginning of the prompt.
 *   **Mitigation:** **Position Swapping.** Run every evaluation twice, swapping the order of the candidate answers. If the judge changes its mind based on the order, you know you have a position bias.
 
-### 2. Verbosity Bias (The "Yapping" Problem)
+### 2. Verbosity Bias[^2] (The "Yapping" Problem)
 Judges tend to give higher scores to longer, more "confident-sounding" answers, even if they contain less actual information or more "fluff."
 *   **Why it happens:** Models often equate token volume with informational density during training.
 *   **Mitigation:** **Strict Rubrics.** Explicitly instruct the judge to penalize "wordiness" and reward conciseness. You can even include a "conciseness" metric in your custom rubrics.
@@ -170,3 +170,7 @@ For a deeper understanding of the underlying RAG architecture, we highly recomme
 ### Further Reading
 *   [How to Correctly Report LLM-as-a-Judge Evaluations](https://www.researchgate.net/publication/398025665_How_to_Correctly_Report_LLM-as-a-Judge_Evaluations)
 *   [Defining and evaluating political bias in LLMs](https://openai.com/index/defining-and-evaluating-political-bias-in-llms/)
+
+[^1]: [1. Judging the Judges: A Systematic Study of Position Bias in
+LLM-as-a-Judge](https://aclanthology.org/2025.ijcnlp-long.18.pdf)
+[^2]: [2. Verbosity Bias in Preference Labeling by Large Language Models](https://arxiv.org/abs/2310.10076)
