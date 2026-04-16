@@ -28,6 +28,30 @@ export function composeMiddleware(
   };
 }
 
+function summarizeError(err: unknown): { type: string; message: string; causeCode?: string } {
+  if (err instanceof Error) {
+    const cause = (err as Error & { cause?: unknown }).cause;
+    const causeCode =
+      typeof cause === "object" &&
+      cause !== null &&
+      "code" in cause &&
+      typeof (cause as { code?: unknown }).code === "string"
+        ? (cause as { code: string }).code
+        : undefined;
+
+    return {
+      type: err.name,
+      message: err.message,
+      ...(causeCode ? { causeCode } : {}),
+    };
+  }
+
+  return {
+    type: typeof err,
+    message: String(err),
+  };
+}
+
 export const loggingMiddleware: Middleware = {
   name: 'logging',
   async handle(req, next) {
@@ -48,7 +72,7 @@ export const loggingMiddleware: Middleware = {
         method: req.method,
         url: req.url,
         duration,
-        err
+        error: summarizeError(err)
       }, `[HttpClient] ${req.method} ${req.url} - FAILED (${duration}ms)`);
       throw err;
     }
@@ -104,7 +128,7 @@ export function createRetryMiddleware(config: RetryConfig): Middleware {
           if (attempt < config.attempts) {
             logger.warn({
               attempt,
-              err,
+              error: summarizeError(err),
               url: req.url
             }, `Retrying request to ${req.url} due to error`);
             await new Promise((resolve) => setTimeout(resolve, config.delay));
