@@ -51,6 +51,7 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "test": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "tsc --noEmit",
     "prepublishOnly": "pnpm run build"
   },
@@ -67,6 +68,7 @@
     "tsdown": "^0.21.3",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0",
+    "@vitest/coverage-v8": "^4.1.0",
     "@types/node": "^20.0.0"
   }
 }
