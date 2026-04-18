@@ -7,12 +7,12 @@ import {EvaliphyErrorCode, LLMJudgeConfig, logger} from "@evaliphy/core";
 vi.mock('ai', () => ({
   generateText: vi.fn().mockResolvedValue({
     text: 'mocked response',
+    output: { result: 'mocked object' },
     usage: { totalTokens: 10 },
   }),
-  generateObject: vi.fn().mockResolvedValue({
-    object: { result: 'mocked object' },
-    usage: { totalTokens: 20 },
-  }),
+  Output: {
+    object: vi.fn().mockReturnValue({ type: 'object' }),
+  },
 }));
 
 vi.mock('@evaliphy/core', async () => {
@@ -85,8 +85,8 @@ describe('EvaliphyLLMClient', () => {
   });
 
   it('should log error message and wrap in EvaliphyError when generateObject fails', async () => {
-    const { generateObject } = await import('ai');
-    (generateObject as any).mockRejectedValueOnce(new Error('Schema Error'));
+    const { generateText } = await import('ai');
+    (generateText as any).mockRejectedValueOnce(new Error('Schema Error'));
 
     const schema = z.object({ result: z.string() });
     await expect(client.generateObject('test prompt', schema)).rejects.toThrow(/LLM request failed: Schema Error/);
