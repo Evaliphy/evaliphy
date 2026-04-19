@@ -65,11 +65,6 @@ export function resolveReporters(fileConfig: EvaliphyConfig): EvaliphyReporter[]
             HtmlWriter.write(report, reportDir);
         }
     });
-    // NOTE: do NOT call jsonAccumulator.attach() here. registerReporters() below
-    // subscribes the same onRunStart/onTestPass/onTestFail/onRunEnd handlers via
-    // the generic reporter wiring loop, so calling attach() would double-register
-    // them and each test would be appended to the RunReportBuilder twice -- the
-    // exact "same test appears twice in the HTML report" bug described in #34.
     reporters.push(jsonAccumulator);
 
     for (const reporter of reportersConfig) {
