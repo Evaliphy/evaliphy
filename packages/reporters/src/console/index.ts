@@ -24,6 +24,7 @@ export class ConsoleReporter implements EvaliphyReporter {
   name = 'console-reporter';
   private options: Required<ConsoleReporterOptions>;
   private startTime: number = 0;
+  private runTimestamp: string = '';
   private failures: TestFailPayload[] = [];
   private spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
   private spinnerIndex = 0;
@@ -69,6 +70,7 @@ export class ConsoleReporter implements EvaliphyReporter {
 
   onRunStart(payload: RunStartPayload) {
     this.startTime = Date.now();
+    this.runTimestamp = new Date().toISOString();
     this.failures = [];
     
     console.log(`\n ${pc.cyan(pc.bold('evaliphy'))} ${pc.dim('v1.0.0')}`);
@@ -150,7 +152,7 @@ export class ConsoleReporter implements EvaliphyReporter {
       pc.bold('Tests:       ') + (payload.failed > 0 ? pc.red(`${payload.failed} failed`) + pc.dim(', ') : '') + pc.green(`${payload.passed} passed`) + pc.dim(`, ${total} total`),
       pc.bold('Time:        ') + pc.white(duration),
       pc.bold('Run ID:      ') + pc.dim(payload.runId),
-      pc.bold('HTML Report: ') + pc.dim('report/report-' + payload.runId + '.html')
+      pc.bold('HTML Report: ') + pc.dim('reports/run-' + this.runTimestamp.replace(/[:.]/g, '-') + '/report.html')
     ];
 
     summary.forEach(line => console.log(` ${line}`));
