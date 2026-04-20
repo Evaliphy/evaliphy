@@ -16,9 +16,10 @@ export * from './collection/types.js';
 export { ConfigLoader, EvaliphyError, EvaliphyErrorCode };
 
   export { getConfig, getResult, withConfig, withResult } from './config/context.js';
-  export { mergeConfigs } from './config/mergeConfig.js';
+    export { mergeConfigs } from './config/mergeConfig.js';
 
 export { defineConfig } from './config/defineConfig.js';
+export { loadRuntimeModule } from './runtime/moduleLoader.js';
 
 export * from './config/types.js';
 export * from './events/emitter.js';

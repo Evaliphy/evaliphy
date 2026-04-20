@@ -9,6 +9,7 @@ import {
     getFileConfig,
     getHooks,
     getRegistry,
+    loadRuntimeModule,
     logger,
     withConfig,
     withResult
@@ -136,15 +137,13 @@ async function getFilesToRun(explicitFile: string | undefined, config: EvaliphyC
  * Dynamically imports an evaluation file and ensures the registry is cleared before if needed.
  */
 async function importEvalFile(file: string) {
-    const fileUrl = path.isAbsolute(file) ? `file://${file}` : `file://${path.resolve(process.cwd(), file)}`;
     try {
-        // To ignore the node js cache (bypass the Node.js module cache)
-        await import(`${fileUrl}?update=${Date.now()}`);
+        await loadRuntimeModule(file, { fresh: true });
     } catch (err: any) {
         throw new EvaliphyError(
             EvaliphyErrorCode.INTERNAL_ERROR,
             `Failed to import evaluation file: ${file}`,
-            'Ensure the file path is correct and it is a valid ES module.',
+            'Ensure the file path is correct and the file has valid runtime syntax.',
             err
         );
     }
