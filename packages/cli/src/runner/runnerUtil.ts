@@ -65,7 +65,6 @@ export function resolveReporters(fileConfig: EvaliphyConfig): EvaliphyReporter[]
             HtmlWriter.write(report, reportDir);
         }
     });
-    jsonAccumulator.attach();
     reporters.push(jsonAccumulator);
 
     for (const reporter of reportersConfig) {

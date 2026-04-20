@@ -9,7 +9,6 @@ import {
   TestPassPayload,
   TestRetryPayload,
   TestStartPayload,
-  emitter
 } from '@evaliphy/core';
 import { RunReport, RunReportBuilder, RunResult } from './RunReportBuilder.js';
 
@@ -33,15 +32,6 @@ export class JsonAccumulator implements EvaliphyReporter {
     onDiscoveryStart?: ((payload: DiscoveryStartPayload) => void | Promise<void>) | undefined;
     onDiscoveryFile?: ((payload: DiscoveryFilePayload) => void | Promise<void>) | undefined;
     onDiscoveryEnd?: ((payload: DiscoveryEndPayload) => void | Promise<void>) | undefined;
-
-  attach(): void {
-    this.bindHandlers();
-    
-    emitter.on('run:start', this.onRunStart);
-    emitter.on('test:pass', this.onTestPass);
-    emitter.on('test:fail', this.onTestFail);
-    emitter.on('run:end', this.onRunEnd);
-  }
 
   onRunStart(payload: RunStartPayload): void {
     this.builder.init({
@@ -80,12 +70,5 @@ export class JsonAccumulator implements EvaliphyReporter {
       duration: payload.duration
     });
     await this.onComplete(report);
-  }
-
-  private bindHandlers(): void {
-    this.onRunStart = this.onRunStart.bind(this);
-    this.onTestPass = this.onTestPass.bind(this);
-    this.onTestFail = this.onTestFail.bind(this);
-    this.onRunEnd = this.onRunEnd.bind(this);
   }
 }

@@ -124,6 +124,12 @@ We are currently in open beta and looking for feedback from QA teams and enginee
 
 [Documentation](https://evaliphy.com) | [GitHub](https://github.com/evaliphy/evaliphy) | [Submit Feedback](https://forms.gle/9ztrqUCXUg2YGSJJA)
 
+## 🚀 Built by the Community
+
+<a href="https://github.com/Evaliphy/evaliphy/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Evaliphy/evaliphy" />
+</a>
+
 ## 📄 License
 
 MIT © [Evaliphy](https://github.com/evaliphy/evaliphy)

@@ -186,20 +186,124 @@ tr.expandable {
   overflow-y: auto;
 }
 
-.assertion-list {
-  margin-top: 1rem;
+.assertions-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
 }
 
-.assertion-item {
+.assertion-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.assertion-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.assertion-card.passed {
+  border-left: 4px solid var(--success-color);
+}
+
+.assertion-card.failed {
+  border-left: 4px solid var(--failure-color);
+}
+
+.assertion-card-header {
   display: flex;
   justify-content: space-between;
-  padding: 0.5rem 0;
+  align-items: flex-start;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.02);
   border-bottom: 1px solid var(--border-color);
 }
 
-.assertion-reason {
-  font-size: 0.8125rem;
+.assertion-card-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.assertion-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
+.assertion-score {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.assertion-score-label {
+  font-size: 0.7rem;
   color: var(--gray-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.assertion-score-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.assertion-threshold-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 0.625rem 1rem;
+  background: rgba(0, 0, 0, 0.015);
+}
+
+.assertion-threshold-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.assertion-meta-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gray-color);
+  font-weight: 600;
+}
+
+.assertion-meta-value {
+  font-size: 0.875rem;
+  color: var(--text-color);
+}
+
+.assertion-reasoning {
+  padding: 0.75rem 1rem;
+}
+
+.assertion-reason {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-color);
   margin-top: 0.25rem;
+}
+
+.assertion-card-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--gray-color);
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.assertion-card-footer code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  color: var(--text-color);
 }
 `;
