@@ -18,49 +18,12 @@ export interface LoadedPrompt {
  */
 export class PromptLoader {
   /**
-   * Resolves the correct prompt file path based on priority and loads it.
-   * Priority: 
-   * 1. User config (promptsDir)
-   * 2. SDK Dist (./prompts)
-   * 3. SDK Source (../../prompts)
+   * High-level orchestrator to resolve and load a prompt.
    */
   static resolveAndLoad(matcherName: string, assertion: AssertionDefinition, config: any): LoadedPrompt {
-    const configDir = config.configFile ? path.dirname(config.configFile) : process.cwd();
-    
-    // 1. Check for custom prompts directory from user config
-    const customPromptsDir = config.llmAsJudgeConfig?.promptsDir
-      ? path.resolve(configDir, config.llmAsJudgeConfig.promptsDir)
-      : null;
-
-    // SDK internal prompt directories
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const sdkPromptsDirDist = path.resolve(__dirname, './prompts');
-    const sdkPromptsDirSource = path.resolve(__dirname, '../../prompts');
-
     try {
-      // Priority 1: User Config
-      if (customPromptsDir) {
-        const customPath = path.join(customPromptsDir, `${matcherName}.md`);
-        if (this.exists(customPath)) {
-          return this.load(customPath, assertion);
-        }
-        logger.warn(`Custom prompt file not found at: ${customPath}. Falling back to defaults.`);
-      }
-
-      // Fallback 1: SDK Dist
-      const distPath = path.join(sdkPromptsDirDist, `${matcherName}.md`);
-      if (this.exists(distPath)) {
-        return this.load(distPath, assertion);
-      }
-
-      // Fallback 2: SDK Source
-      const sourcePath = path.join(sdkPromptsDirSource, `${matcherName}.md`);
-      if (this.exists(sourcePath)) {
-        return this.load(sourcePath, assertion);
-      }
-
-      // If absolutely none found, try to load from Dist to trigger the standard FILE_NOT_FOUND error
-      return this.load(distPath, assertion);
+      const filePath = this.resolvePromptPath(matcherName, config);
+      return this.load(filePath, assertion);
     } catch (error: any) {
       if (error instanceof EvaliphyError) throw error;
       throw new EvaliphyError(
@@ -70,6 +33,55 @@ export class PromptLoader {
         error
       );
     }
+  }
+
+  /**
+   * Logic to find the first existing prompt file path based on priority.
+   */
+  private static resolvePromptPath(matcherName: string, config: any): string {
+    const { customPath, distPath, sourcePath } = this.getPotentialPaths(matcherName, config);
+
+    // Priority 1: User Config
+    if (customPath && this.exists(customPath)) {
+      return customPath;
+    }
+    
+    if (customPath) {
+        logger.warn(`Custom prompt file not found at: ${customPath}. Falling back to defaults.`);
+    }
+
+    // Fallback 1: SDK Dist
+    if (this.exists(distPath)) {
+      return distPath;
+    }
+
+    // Fallback 2: SDK Source
+    if (this.exists(sourcePath)) {
+      return sourcePath;
+    }
+
+    // Default to Dist path even if missing to trigger standard FILE_NOT_FOUND error in load()
+    return distPath;
+  }
+
+  /**
+   * Calculates all potential paths where the prompt might exist.
+   */
+  private static getPotentialPaths(matcherName: string, config: any) {
+    const configDir = config.configFile ? path.dirname(config.configFile) : process.cwd();
+    const fileName = `${matcherName}.md`;
+
+    const customPromptsDir = config.llmAsJudgeConfig?.promptsDir
+      ? path.resolve(configDir, config.llmAsJudgeConfig.promptsDir)
+      : null;
+
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    
+    return {
+      customPath: customPromptsDir ? path.join(customPromptsDir, fileName) : null,
+      distPath: path.resolve(__dirname, './prompts', fileName),
+      sourcePath: path.resolve(__dirname, '../../prompts', fileName)
+    };
   }
 
   static exists(filePath: string): boolean {
@@ -120,14 +132,12 @@ export class PromptLoader {
         if (value === '') {
           frontmatter[key.trim()] = [];
         } else if (value.startsWith('-')) {
-          // Handle simple lists
           const listKey = key.trim();
           if (!frontmatter[listKey]) frontmatter[listKey] = [];
         } else {
           frontmatter[key.trim()] = value;
         }
       } else if (line.trim().startsWith('-')) {
-        // Continue list
         const lastKey = Object.keys(frontmatter).pop();
         if (lastKey && Array.isArray(frontmatter[lastKey])) {
           frontmatter[lastKey].push(line.trim().substring(1).trim());
@@ -148,7 +158,6 @@ export class PromptLoader {
     const declared = frontmatter.input_variables ?? [];
     const usedInTemplate = this.extractTemplateVariables(template);
 
-    // check declared variables match what the assertion requires
     const missingDeclared = required.filter(v => !declared.includes(v));
     if (missingDeclared.length > 0) {
       throw new EvaliphyError(
@@ -158,7 +167,6 @@ export class PromptLoader {
       );
     }
 
-    // check the template actually uses the variables it declares
     const missingInTemplate = declared.filter((v: string) => !usedInTemplate.includes(v));
     if (missingInTemplate.length > 0) {
       throw new EvaliphyError(
