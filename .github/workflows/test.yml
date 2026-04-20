@@ -32,7 +32,10 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Test with coverage
+      - name: Test
+        run: pnpm run test
+
+      - name: Coverage
         run: pnpm run test:coverage
 
       - name: Upload coverage report
@@ -41,4 +44,4 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
-          retention-days: 7
+          retention-days: 30
