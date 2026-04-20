@@ -1,5 +1,7 @@
-import { EvaliphyError, EvaliphyErrorCode } from '@evaliphy/core';
+import { EvaliphyError, EvaliphyErrorCode, logger } from '@evaliphy/core';
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { AssertionDefinition } from "../registry.js";
 
 export interface LoadedPrompt {
@@ -11,7 +13,65 @@ export interface LoadedPrompt {
   };
 }
 
+/**
+ * Service to handle centralized prompt searching and loading.
+ */
 export class PromptLoader {
+  /**
+   * Resolves the correct prompt file path based on priority and loads it.
+   * Priority: 
+   * 1. User config (promptsDir)
+   * 2. SDK Dist (./prompts)
+   * 3. SDK Source (../../prompts)
+   */
+  static resolveAndLoad(matcherName: string, assertion: AssertionDefinition, config: any): LoadedPrompt {
+    const configDir = config.configFile ? path.dirname(config.configFile) : process.cwd();
+    
+    // 1. Check for custom prompts directory from user config
+    const customPromptsDir = config.llmAsJudgeConfig?.promptsDir
+      ? path.resolve(configDir, config.llmAsJudgeConfig.promptsDir)
+      : null;
+
+    // SDK internal prompt directories
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const sdkPromptsDirDist = path.resolve(__dirname, './prompts');
+    const sdkPromptsDirSource = path.resolve(__dirname, '../../prompts');
+
+    try {
+      // Priority 1: User Config
+      if (customPromptsDir) {
+        const customPath = path.join(customPromptsDir, `${matcherName}.md`);
+        if (this.exists(customPath)) {
+          return this.load(customPath, assertion);
+        }
+        logger.warn(`Custom prompt file not found at: ${customPath}. Falling back to defaults.`);
+      }
+
+      // Fallback 1: SDK Dist
+      const distPath = path.join(sdkPromptsDirDist, `${matcherName}.md`);
+      if (this.exists(distPath)) {
+        return this.load(distPath, assertion);
+      }
+
+      // Fallback 2: SDK Source
+      const sourcePath = path.join(sdkPromptsDirSource, `${matcherName}.md`);
+      if (this.exists(sourcePath)) {
+        return this.load(sourcePath, assertion);
+      }
+
+      // If absolutely none found, try to load from Dist to trigger the standard FILE_NOT_FOUND error
+      return this.load(distPath, assertion);
+    } catch (error: any) {
+      if (error instanceof EvaliphyError) throw error;
+      throw new EvaliphyError(
+        EvaliphyErrorCode.PROMPT_LOAD_ERROR,
+        `Failed to load prompt for "${matcherName}": ${error.message}`,
+        'Check your prompt file formatting and variables.',
+        error
+      );
+    }
+  }
+
   static exists(filePath: string): boolean {
     return fs.existsSync(filePath);
   }
