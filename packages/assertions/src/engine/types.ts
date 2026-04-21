@@ -27,6 +27,51 @@ export interface QuerySample extends EvalInput {
   query: string;
 }
 
+/**
+ * Assertions that only require a response string.
+ */
+export interface TextAssertions {
+  /**
+   * Negates the next assertion in the chain.
+   */
+  not: TextAssertions;
+
+  /**
+   * Asserts that the response is logically consistent and easy to follow.
+   */
+  toBeCoherent(options?: AssertionOptions): Promise<EvalResult | void>;
+
+  /**
+   * Asserts that the response contains no toxic, harmful, or biased content.
+   */
+  toBeHarmless(options?: AssertionOptions): Promise<EvalResult | void>;
+}
+
+/**
+ * Assertions that require the full RAG triad (query, response, context).
+ */
+export interface RagAssertions extends TextAssertions {
+  /**
+   * Negates the next assertion in the chain.
+   */
+  not: RagAssertions;
+
+  /**
+   * Asserts that the response is faithful to the provided context.
+   */
+  toBeFaithful(options?: AssertionOptions): Promise<EvalResult | void>;
+
+  /**
+   * Asserts that the response directly addresses the user's query.
+   */
+  toBeRelevant(options?: AssertionOptions): Promise<EvalResult | void>;
+
+  /**
+   * Asserts that the response is supported by the provided context.
+   */
+  toBeGrounded(options?: AssertionOptions): Promise<EvalResult | void>;
+}
+
 export interface EvalResult {
   pass: boolean;
   score?: number;
