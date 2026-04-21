@@ -8,11 +8,12 @@
   <a href="https://www.npmjs.com/package/evaliphy"><img src="https://img.shields.io/npm/v/evaliphy/beta.svg" alt="npm version" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
   <a href="https://evaliphy.com"><img src="https://img.shields.io/badge/docs-latest-blue.svg" alt="Documentation" /></a>
+  <a href="https://github.com/Evaliphy/evaliphy/actions"><img src="https://github.com/Evaliphy/evaliphy/actions/workflows/test.yml/badge.svg" alt="CI" /></a>
 </p>
 
 ---
 
-Evaliphy is a end-to-end testing solution for evaluating AI aplications. It treats AI pipelines as black boxes, allowing you to write robust, production-ready evaluations using the same workflow you use for end-to-end testing.
+Evaliphy is an end-to-end testing solution for evaluating AI applications. It treats AI pipelines as black boxes, allowing you to write robust, production-ready evaluations using the same workflow you use for end-to-end testing.
 
 If you can write a Playwright or Vitest test, you can evaluate AI.
 
@@ -22,9 +23,16 @@ If you can write a Playwright or Vitest test, you can evaluate AI.
 
 - **Playwright-Style API**: Fluent, chainable assertions that feel natural to QA engineers.
 - **Black-Box Testing**: Evaluate observable outputs (responses) without needing access to internal vector DBs or prompt templates.
-- **LLM-as-a-Judge**: Built-in, production-grade evaluators for Faithfulness, Relevance, Groundedness, and more.
-- **CI/CD Ready**: Runs in your existing pipelines and produces structured reports your whole team can read.
+- **LLM-as-a-Judge**: Built-in, production-grade evaluators for Faithfulness, Relevance, Groundedness, Coherence, and Harmlessness.
+- **Deterministic Assertions**: `toContain` and similar matchers for exact, score-free checks alongside LLM-based ones.
+- **CI/CD Ready**: Runs in your existing pipelines and produces structured HTML + console reports your whole team can read.
 - **TypeScript Native**: Full type safety and IDE autocompletion for your evaluation suites.
+- **Multi-Provider**: Works with OpenAI, Anthropic, Google, Groq, Mistral, Cohere, or any OpenAI-compatible gateway.
+
+## 📋 Prerequisites
+
+- **Node.js** >= 24.0.0
+- An API key for at least one [supported LLM provider](#-supported-llm-providers)
 
 ## 🚀 Quick Start
 
@@ -53,7 +61,8 @@ evaluate("Customer Support Bot", async ({ httpClient }) => {
 
   // 2. Assert against the LLM's behavior in plain English
   await expect({ query, response: answer, context }).toBeFaithful();
-  await expect({ query, response: answer, context }).toBeRelevant({threshold: 0.9});
+  await expect({ query, response: answer, context }).toBeRelevant({ threshold: 0.9 });
+  await expect({ response: answer }).toBeHarmless();
 });
 ```
 
@@ -93,6 +102,54 @@ export default defineConfig({
 });
 ```
 
+## 🔍 Available Assertions
+
+### LLM-as-a-Judge (scored 0.0–1.0)
+
+| Assertion | Description | Default Threshold |
+|---|---|---|
+| `toBeFaithful()` | Response does not hallucinate facts outside the provided context | 0.7 |
+| `toBeRelevant()` | Response directly addresses the user's query | 0.7 |
+| `toBeGrounded()` | Claims in the response are supported by the retrieved context | 0.7 |
+| `toBeCoherent()` | Response is logically consistent and well-structured | 0.7 |
+| `toBeHarmless()` | Response contains no harmful, toxic, or unsafe content | 0.7 |
+
+Pass a custom threshold to any scorer: `toBeFaithful({ threshold: 0.9 })`.
+
+### Deterministic (exact match)
+
+| Assertion | Description |
+|---|---|
+| `toContain(substring)` | Response includes the given substring |
+
+## 🌐 Supported LLM Providers
+
+Use any of these as the `llmAsJudgeConfig.provider`:
+
+| Provider | `type` | Notes |
+|---|---|---|
+| OpenAI | `openai` | Recommended for getting started (`gpt-4o-mini`) |
+| Anthropic | `anthropic` | Claude models |
+| Google | `google` | Gemini models |
+| Groq | `groq` | Fast inference |
+| Mistral | `mistral` | Mistral models |
+| Cohere | `cohere` | Command models |
+| Any gateway | `gateway` | OpenRouter, LiteLLM, Vercel AI Gateway, etc. |
+
+**Gateway example** (OpenRouter):
+
+```typescript
+llmAsJudgeConfig: {
+  model: 'openai/gpt-4o-mini',
+  provider: {
+    type: 'gateway',
+    url: 'https://openrouter.ai/api/v1',
+    apiKey: process.env.OPENROUTER_API_KEY,
+    name: 'openrouter'
+  }
+}
+```
+
 ## 🧠 Why Evaliphy?
 
 ### It fits where your tests already live.
@@ -113,6 +170,15 @@ Evaliphy uses an **LLM-as-a-Judge** workflow to provide objective, repeatable sc
 3. **Thresholding**: If the score meets your threshold (default 0.7), the test passes.
 
 ![Evaliphy Internal Mechanism](./website/public/images/how-evaliphy-works.png)
+
+## 🤝 Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on:
+- Reporting bugs and requesting features
+- Setting up a local development environment
+- Submitting pull requests
+
+Good first issues are labeled [`good first issue`](https://github.com/Evaliphy/evaliphy/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
 
 ## 🤝 Join the Beta
 
