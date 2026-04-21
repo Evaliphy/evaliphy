@@ -32,19 +32,20 @@ export default async function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Evaliphy",
-    "operatingSystem": "Node.js",
-    "applicationCategory": "DeveloperApplication",
-    "description": "Evaliphy is the simplest AI testing framework for engineers. Write assertions in TypeScript, test your real API, get structured reports.",
-    "offers": {
+    name: "Evaliphy",
+    operatingSystem: "Node.js",
+    applicationCategory: "DeveloperApplication",
+    description:
+      "Evaliphy is the simplest AI testing framework for engineers. Write assertions in TypeScript, test your real API, get structured reports.",
+    offers: {
       "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
+      price: "0",
+      priceCurrency: "USD",
     },
-    "author": {
+    author: {
       "@type": "Organization",
-      "name": "Evaliphy"
-    }
+      name: "Evaliphy",
+    },
   };
 
   return (
@@ -87,7 +88,6 @@ export default async function Home() {
                   View on GitHub
                 </Link>
               </div>
-
             </div>
           </div>
 
@@ -107,7 +107,9 @@ export default async function Home() {
             <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 opacity-50 grayscale">
               <span className="text-xl font-bold text-zinc-900">OpenAI</span>
               <span className="text-xl font-bold text-zinc-900">Anthropic</span>
-              <span className="text-xl font-bold text-zinc-900">OpenRouter</span>
+              <span className="text-xl font-bold text-zinc-900">
+                OpenRouter
+              </span>
               <span className="text-xl font-bold text-zinc-900">Mistral</span>
               <span className="text-xl font-bold text-zinc-900">Vercel</span>
             </div>
@@ -115,8 +117,39 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* What is Evaliphy Section */}
+      <section className="py-24 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto w-full border-t border-zinc-100">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div className="space-y-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">
+              What is Evaliphy?
+            </h2>
+            <p className="text-lg text-zinc-600 leading-relaxed">
+              Evaliphy is an AI evaluation framework that treats your AI system
+              as a black box. Write assertions against your real API, get
+              structured results, and catch regressions in CI — without touching
+              internals of AI system or writing prompt engineering from
+              scratch.
+            </p>
+            <p className="text-lg text-zinc-600 leading-relaxed">
+              Built-in LLM-as-Judge assertions handle the hard parts. You focus
+              on writing evaluations, not wiring up models.
+            </p>
+          </div>
+          <div className="relative rounded-2xl border border-zinc-200 bg-zinc-50 p-2 overflow-hidden shadow-xl">
+            <Image
+              src="/images/how-evaliphy-works.png"
+              alt="How Evaliphy Works"
+              width={800}
+              height={600}
+              className="rounded-xl object-cover w-full h-auto"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Evaliphy Report Section */}
-      <section className="py-24 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto w-full">
+      <section className="py-24 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto w-full border-t border-zinc-100">
         <div className="text-center mb-16 space-y-4">
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">
             Human-readable evaluation reports
@@ -126,14 +159,26 @@ export default async function Home() {
           </p>
         </div>
 
-        <div className="relative rounded-2xl border border-zinc-200 bg-zinc-50 p-2 overflow-hidden shadow-2xl">
-          <Image
-            src="/images/report.png"
-            alt="Evaliphy Evaluation Report"
-            width={1200}
-            height={800}
-            className="rounded-xl object-cover w-full h-auto"
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div className="relative rounded-2xl border border-zinc-200 bg-zinc-50 p-2 overflow-hidden shadow-2xl">
+            <Image
+              src="/gif/demo.gif"
+              alt="Evaliphy Demo"
+              width={1200}
+              height={800}
+              className="rounded-xl object-cover w-full h-auto"
+              unoptimized
+            />
+          </div>
+          <div className="relative rounded-2xl border border-zinc-200 bg-zinc-50 p-2 overflow-hidden shadow-2xl">
+            <Image
+              src="/gif/report.gif"
+              alt="Evaliphy Evaluation Report"
+              width={1200}
+              height={800}
+              className="rounded-xl object-cover w-full h-auto"
+            />
+          </div>
         </div>
       </section>
 
@@ -166,8 +211,8 @@ export default async function Home() {
                 Understandable Metrics
               </h3>
               <p className="text-zinc-600 leading-relaxed">
-                Forget {"\""}Contextual Precision{"\""} and {"\""}Cosine Similarity.{"\""} Assert
-                against what actually matters:
+                Forget {'"'}Contextual Precision{'"'} and {'"'}Cosine
+                Similarity.{'"'} Assert against what actually matters:
                 <code className="mx-1 text-zinc-900 font-mono text-sm">
                   toBeFaithful()
                 </code>
@@ -228,8 +273,8 @@ export default async function Home() {
               </h3>
               <p className="text-zinc-600 leading-relaxed">
                 We spent hundreds of hours benchmarking LLM-as-a-judge prompts
-                so you don{"'"}t have to. Just provide your API key, and Evaliphy
-                handles the prompting, parsing, and retry logic.
+                so you don{"'"}t have to. Just provide your API key, and
+                Evaliphy handles the prompting, parsing, and retry logic.
               </p>
             </div>
             <div className="space-y-4">
@@ -271,7 +316,8 @@ export default async function Home() {
             Built for QA, not Research
           </h2>
           <p className="text-lg text-zinc-600 max-w-2xl mx-auto">
-            Evaliphy is the only evaluation framework that treats RAG as a black box.
+            Evaliphy is the only evaluation framework that treats RAG as a black
+            box.
           </p>
         </div>
 
@@ -279,31 +325,57 @@ export default async function Home() {
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-zinc-100">
-                <th className="py-4 px-6 text-left text-sm font-semibold text-zinc-900">Feature</th>
-                <th className="py-4 px-6 text-center text-sm font-semibold text-zinc-900 bg-zinc-50/50">Evaliphy</th>
-                <th className="py-4 px-6 text-center text-sm font-semibold text-zinc-500">DeepEval / Ragas</th>
+                <th className="py-4 px-6 text-left text-sm font-semibold text-zinc-900">
+                  Feature
+                </th>
+                <th className="py-4 px-6 text-center text-sm font-semibold text-zinc-900 bg-zinc-50/50">
+                  Evaliphy
+                </th>
+                <th className="py-4 px-6 text-center text-sm font-semibold text-zinc-500">
+                  DeepEval / Ragas
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr className="border-b border-zinc-100">
-                <td className="py-4 px-6 text-sm text-zinc-600">Primary Audience</td>
-                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">QA & Software Engineers</td>
-                <td className="py-4 px-6 text-center text-sm text-zinc-500">Data Scientists</td>
+                <td className="py-4 px-6 text-sm text-zinc-600">
+                  Primary Audience
+                </td>
+                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">
+                  QA & Software Engineers
+                </td>
+                <td className="py-4 px-6 text-center text-sm text-zinc-500">
+                  Data Scientists
+                </td>
               </tr>
               <tr className="border-b border-zinc-100">
                 <td className="py-4 px-6 text-sm text-zinc-600">Language</td>
-                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">TypeScript / Node.js</td>
-                <td className="py-4 px-6 text-center text-sm text-zinc-500">Python</td>
+                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">
+                  TypeScript / Node.js
+                </td>
+                <td className="py-4 px-6 text-center text-sm text-zinc-500">
+                  Python
+                </td>
               </tr>
               <tr className="border-b border-zinc-100">
-                <td className="py-4 px-6 text-sm text-zinc-600">Testing Style</td>
-                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">Black-box (API-driven)</td>
-                <td className="py-4 px-6 text-center text-sm text-zinc-500">White-box (Pipeline-driven)</td>
+                <td className="py-4 px-6 text-sm text-zinc-600">
+                  Testing Style
+                </td>
+                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">
+                  Black-box (API-driven)
+                </td>
+                <td className="py-4 px-6 text-center text-sm text-zinc-500">
+                  White-box (Pipeline-driven)
+                </td>
               </tr>
               <tr className="border-b border-zinc-100">
                 <td className="py-4 px-6 text-sm text-zinc-600">Integration</td>
-                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">CI/CD Ready (npx)</td>
-                <td className="py-4 px-6 text-center text-sm text-zinc-500">Notebooks / Python Scripts</td>
+                <td className="py-4 px-6 text-center text-sm font-medium text-zinc-900 bg-zinc-50/50">
+                  CI/CD Ready (npx)
+                </td>
+                <td className="py-4 px-6 text-center text-sm text-zinc-500">
+                  Notebooks / Python Scripts
+                </td>
               </tr>
             </tbody>
           </table>
