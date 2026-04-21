@@ -35,7 +35,7 @@ describe('HtmlWriter', () => {
     const outputPath = HtmlWriter.write(reportFixture as any, outputDir);
 
     expect(fs.writeFileSync).toHaveBeenCalled();
-    expect(outputPath).toContain(`report-${reportFixture.meta.runId}.html`);
+    expect(outputPath).toContain('report.html');
   });
 });
 

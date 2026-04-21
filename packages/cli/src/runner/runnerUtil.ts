@@ -56,13 +56,14 @@ export function resolveReporters(fileConfig: EvaliphyConfig): EvaliphyReporter[]
     const jsonAccumulator = new JsonAccumulator({
         onComplete: async (report) => {
             const baseDir = fileConfig.configFile ? path.dirname(fileConfig.configFile) : process.cwd();
-            const reportDir = path.join(baseDir, 'report');
-            await fs.mkdir(reportDir, { recursive: true });
-            const reportPath = path.join(reportDir, `report-${report.meta.runId}.json`);
+            const ts = report.meta.timestamp.replace(/[:.]/g, '-');
+            const runDir = path.join(baseDir, 'reports', `run-${ts}`);
+            await fs.mkdir(runDir, { recursive: true });
+            const reportPath = path.join(runDir, 'results.json');
             await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
 
             // Generate HTML report
-            HtmlWriter.write(report, reportDir);
+            HtmlWriter.write(report, runDir);
         }
     });
     reporters.push(jsonAccumulator);

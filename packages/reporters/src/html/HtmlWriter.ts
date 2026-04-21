@@ -6,7 +6,7 @@ import { PageRenderer } from './renderer/PageRenderer.js';
 export class HtmlWriter {
   static write(report: RunReport, outputDir: string): string {
     const html = PageRenderer.render(report);
-    const fileName = `report-${report.meta.runId}.html`;
+    const fileName = 'report.html';
     const outputPath = path.join(outputDir, fileName);
 
     if (!fs.existsSync(outputDir)) {
