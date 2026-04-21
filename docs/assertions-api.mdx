@@ -2,25 +2,37 @@
 
 Evaliphy provides a professional, chainable assertion API designed for black-box QA testing of Generative AI. It focuses on observable behavior rather than internal ML metrics.
 
-## `expect<T>(input: string | T)`
+## expect
 
-The entry point for all assertions.
+The entry point for all assertions. Evaliphy uses TypeScript overloads to provide the best developer experience based on your input.
 
-- **`input`**: Either a simple response string or a structured evaluation input object.
-- **Returns**: A `MatcherChain` object.
-
-### `EvaluationSample`
-
-For answer-related evaluations, use the `EvaluationSample` interface for full type safety and autocomplete.
+### 1. Response Only
+If you only have the LLM's response, you can pass it as a string. This enables basic assertions like `toBeCoherent` and `toBeHarmless`.
 
 ```typescript
-interface EvaluationSample {
-  response: string;           // The LLM's generated output
+await expect("The response text").toBeCoherent();
+```
+
+### 2. RAG Triad (Positional)
+For RAG evaluations, you can pass the query, context, and response as positional arguments.
+
+```typescript
+await expect(query, context, response).toBeFaithful();
+```
+
+### 3. Structured Input (`RagSample`)
+For full type safety and complex evaluations, use the `RagSample` interface.
+
+```typescript
+interface RagSample {
   query: string;              // The user's original question
-  context?: string | string[]; // Optional golden context or retrieved chunks
-  history?: Array<{ role: string; content: string }>; // Optional conversation history
-  metadata?: Record<string, any>; // Optional metadata for reporting
+  context: string | string[]; // The retrieved context
+  response: string;           // The LLM's generated output
+  history?: Array<{ role: string; content: string }>;
+  metadata?: Record<string, any>;
 }
+
+await expect({ query, context, response }).toBeFaithful();
 ```
 
 ---

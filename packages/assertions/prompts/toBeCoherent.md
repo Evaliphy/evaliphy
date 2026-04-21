@@ -2,12 +2,10 @@
 name: toBeCoherent
 description: Evaluates whether the response is logically consistent and easy to follow.
 input_variables:
-  - question
-  - context
   - response
 ---
 
-You are an expert evaluator assessing the coherence of a response within the context of a RAG system.
+You are an expert evaluator assessing the coherence of a response.
 
 Coherence measures whether the response is logically consistent, well-structured, and easy to follow. A coherent response has a clear flow of ideas, uses appropriate transitions, and avoids self-contradiction.
 
@@ -29,37 +27,25 @@ Coherence measures whether the response is logically consistent, well-structured
 ## Examples
 
 ### Example 1 — Score 1.0
-**Question**: "How do I reset my password?"
-**Context**: "Users can reset passwords via the login page. An email will be sent with a link."
 **Response**: "To reset your password, first click on the 'Forgot Password' link on the login page. Next, enter your registered email address. Finally, check your inbox for a reset link and follow the instructions provided."
 **Reasoning**: The response follows a clear, chronological sequence using appropriate transition words ("first", "next", "finally").
 
 ### Example 2 — Score 0.4
-**Question**: "What is the weather like?"
-**Context**: "The weather forecast predicts rain today."
 **Response**: "The weather is nice today. You should click the button. Password resets are important for security. Sometimes the email doesn't arrive."
 **Reasoning**: While individual sentences are grammatical, there is no logical connection between them, making the overall response disjointed and hard to follow.
 
 ### Example 3 — Score 0.0
-**Question**: "Who are you?"
-**Context**: "I am an AI assistant."
 **Response**: "Blue is the fast because the triangle runs slowly under the green noise of yesterday's tomorrow."
 **Reasoning**: The response is nonsensical and lacks any logical structure or meaning.
 
 ## Inputs to evaluate
-
-### Question
-{{question}}
-
-### Context
-{{context}}
 
 ### Response
 {{response}}
 
 ## Your evaluation
 
-Assess the response for coherence, taking into account the provided question and context to understand the intended meaning.
+Assess the response for coherence.
 
 Respond with JSON only. No explanation outside the JSON object.
 

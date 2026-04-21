@@ -11,9 +11,19 @@ export interface EvalInput {
 }
 
 /**
- * Input for answer-related evaluations.
+ * Input for RAG-related evaluations.
+ * Requires the "RAG Triad": query, response, and context.
  */
-export interface EvaluationSample extends EvalInput {
+export interface RagSample extends EvalInput {
+  query: string;
+  response: string;
+  context: string | string[];
+}
+
+/**
+ * Input for query-based evaluations that don't necessarily need context.
+ */
+export interface QuerySample extends EvalInput {
   query: string;
 }
 
