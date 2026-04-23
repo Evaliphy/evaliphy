@@ -48,13 +48,22 @@ evaluate("Knowledge Base: Accuracy and Grounding", async ({httpClient}) => {
       model: 'claude-5.12'
     });
 
+    await expect({
+      query: testCase.query,
+      context: testCase.context,
+      response: data.content
+    }).toBeRelevant({
+      threshold: 0.8,
+      model: 'claude-5.12'
+    });
+
     // 2. Test with positional arguments
-    await expect(testCase.query, testCase.context, data.content).toBeGrounded();
+    await expect(data.content).toBeGrounded();
 
     // 3. Test with response string only
     await expect(data.content).toBeCoherent();
     await expect(data.content).toBeHarmless();
-    await expect("some", "something else", "some" ).toBeHarmless();
+    await expect("some" ).toBeHarmless();
 
     // 4. Test with .not negation
     await expect(data.content).not.toBeHarmless({ threshold: 0.1 }); // Should fail if it IS harmless
@@ -72,7 +81,7 @@ evaluate("Safety: Hallucination Check", async ({httpClient}) => {
   const data: LLMResponseSchema = await res.json();
 
   // We expect the bot NOT to answer this query using the provided context
-  await expect(query, context, data.content).not.toBeFaithful();
+  await expect(data.content).not.toBeFaithful();
 });
 
 evaluate("Context Handling: Multiple Chunks", async ({httpClient}) => {
@@ -89,5 +98,5 @@ evaluate("Context Handling: Multiple Chunks", async ({httpClient}) => {
 
   const data: LLMResponseSchema = await res.json();
 
-  await expect(query, context, data.content).toBeFaithful();
+  await expect(data.content).toBeFaithful();
 });

@@ -1,11 +1,11 @@
-import {EvaliphyError, EvaliphyErrorCode} from "@evaliphy/core";
-import {existsSync} from 'node:fs';
-import {join} from 'node:path';
-import {pathToFileURL} from "node:url";
-import {logger} from "../logger.js";
-import {mergeConfigs} from "./mergeConfig.js";
-import {EvaliphyConfigSchema} from "./schema.js";
-import {EvaliphyConfig} from "./types.js";
+import { EvaliphyError, EvaliphyErrorCode } from "@evaliphy/core";
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { logger } from "../logger.js";
+import { loadRuntimeModule } from '../runtime/moduleLoader.js';
+import { mergeConfigs } from "./mergeConfig.js";
+import { EvaliphyConfigSchema } from "./schema.js";
+import { EvaliphyConfig } from "./types.js";
 
 const G = globalThis as any;
 
@@ -106,9 +106,7 @@ export class ConfigLoader {
     if (!this.cachedConfig) {
       this.configLogger.debug({configPath}, 'Loading base configuration from file');
       try {
-        const fileUrl = pathToFileURL(configPath).href;
-        const mod = await import(fileUrl);
-        let rawConfig = mod?.default ?? mod;
+        const rawConfig = await loadRuntimeModule(configPath);
 
         const parsed = EvaliphyConfigSchema.safeParse(rawConfig);
 
