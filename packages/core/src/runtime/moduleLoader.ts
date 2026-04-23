@@ -1,14 +1,10 @@
-import { createRequire } from 'node:module';
+import { createRequire, register } from 'node:module';
 import { extname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const require = createRequire(import.meta.url);
 
-type TsNodeApi = {
-  register?: (opts?: Record<string, unknown>) => void;
-};
-
-let tsNodeRegistered = false;
+let tsxRegistered = false;
 
 function normalizeModule<T>(mod: unknown): T {
   const value = mod as Record<string, unknown> | undefined;
@@ -27,28 +23,26 @@ function clearRequireCache(modulePath: string) {
   }
 }
 
-function ensureTsNodeRegistered() {
-  if (tsNodeRegistered) return;
+function ensureTsxRegistered() {
+  if (tsxRegistered) return;
 
-  const tsNode = require('ts-node') as TsNodeApi;
-  if (!tsNode?.register) {
-    throw new Error('ts-node is installed but does not expose a register() API.');
+  try {
+    // Try Node.js 20.6.0+ register API
+    // In newer tsx versions, the loader is at 'tsx' or 'tsx/esm'
+    register('tsx', import.meta.url);
+    tsxRegistered = true;
+  } catch (error) {
+    try {
+      // Try CJS API if available
+      require('tsx/cjs');
+      tsxRegistered = true;
+    } catch (innerError) {
+      throw new Error(`Failed to register tsx loader. Ensure tsx is installed. Error: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
-
-  tsNode.register({
-    transpileOnly: true,
-    skipIgnore: true,
-    preferTsExts: true,
-    compilerOptions: {
-      module: 'CommonJS',
-      moduleResolution: 'Node',
-    },
-  });
-
-  tsNodeRegistered = true;
 }
 
-function shouldUseTsNode(extension: string) {
+function shouldUseTsx(extension: string) {
   return extension === '.ts' || extension === '.mts' || extension === '.cts';
 }
 
@@ -70,7 +64,7 @@ function shouldFallbackToImport(error: unknown): boolean {
 
 /**
  * Runtime module loader used by config and eval imports.
- * - `.ts/.mts/.cts` use `ts-node` with CommonJS transpilation to avoid typeless-module warnings.
+ * - `.ts/.mts/.cts` use `tsx` for seamless TypeScript support.
  * - `.cjs` use `require`.
  * - `.mjs` use dynamic import.
  * - `.js` first tries `require` (for CommonJS and typeless packages), then falls back to import.
@@ -80,10 +74,14 @@ export async function loadRuntimeModule<T = unknown>(filePath: string, options?:
   const extension = extname(modulePath).toLowerCase();
   const fresh = options?.fresh ?? false;
 
-  if (shouldUseTsNode(extension)) {
-    ensureTsNodeRegistered();
-    if (fresh) clearRequireCache(modulePath);
-    return normalizeModule<T>(require(modulePath));
+  if (shouldUseTsx(extension)) {
+    ensureTsxRegistered();
+    
+    // tsx works best with dynamic import for ESM compatibility
+    const fileUrl = pathToFileURL(modulePath).href;
+    const importUrl = fresh ? `${fileUrl}?${cacheBustQuery()}` : fileUrl;
+    const imported = await import(importUrl);
+    return normalizeModule<T>(imported);
   }
 
   if (extension === '.cjs') {

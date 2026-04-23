@@ -58,7 +58,6 @@
   "dependencies": {
     "commander": "^12.1.0",
     "fast-glob": "^3.3.3",
-    "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "zod": "^3.0.7",
     "picocolors": "^1.0.0",

@@ -21,7 +21,6 @@ export default defineConfig([
         'pino-pretty',
       'openai',
       'commander',
-      'ts-node',
       'tsx',
       'fast-glob',
       'pino',
@@ -46,7 +45,6 @@ export default defineConfig([
     external: [
       'commander',
       'fast-glob',
-      'ts-node',
       'tsx',
       'pino',
       'node:*',

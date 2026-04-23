@@ -22,7 +22,7 @@ afterEach(async () => {
 });
 
 describe('loadRuntimeModule', () => {
-  it('loads TypeScript modules via ts-node', async () => {
+  it('loads TypeScript modules via tsx', async () => {
     const dir = await createTempDir();
     const filePath = join(dir, 'config.ts');
 
