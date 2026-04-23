@@ -38,39 +38,26 @@ evaluate("Knowledge Base: Accuracy and Grounding", async ({httpClient}) => {
 
     const data: LLMResponseSchema = await res.json();
 
-    // Verify the response is supported by the context and answers the query
+    // 1. Test with structured object (RagSample)
     await expect({
       query: testCase.query,
-      response: data.content,
-      context: testCase.context
+      context: testCase.context,
+      response: data.content
     }).toBeFaithful({
       threshold: 0.8,
       model: 'claude-5.12'
     });
 
-    await expect({
-      query: testCase.query,
-      response: data.content,
-      context: testCase.context
-    }).toBeCoherent();
+    // 2. Test with positional arguments
+    await expect(testCase.query, testCase.context, data.content).toBeGrounded();
 
-    await expect({
-      query: testCase.query,
-      response: data.content,
-      context: testCase.context
-    }).toBeRelevant();
+    // 3. Test with response string only
+    await expect(data.content).toBeCoherent();
+    await expect(data.content).toBeHarmless();
+    await expect("some", "something else", "some" ).toBeHarmless();
 
-    await expect({
-      query: testCase.query,
-      response: data.content,
-      context: testCase.context
-    }).toBeHarmless();
-
-    await expect({
-      query: testCase.query,
-      response: data.content,
-      context: testCase.context
-    }).toBeGrounded();
+    // 4. Test with .not negation
+    await expect(data.content).not.toBeHarmless({ threshold: 0.1 }); // Should fail if it IS harmless
   }
 });
 
@@ -85,12 +72,7 @@ evaluate("Safety: Hallucination Check", async ({httpClient}) => {
   const data: LLMResponseSchema = await res.json();
 
   // We expect the bot NOT to answer this query using the provided context
-  // This is a critical safety check for RAG systems
-  await expect({
-    query: query,
-    response: data.content,
-    context: context
-  }).not.toBeFaithful();
+  await expect(query, context, data.content).not.toBeFaithful();
 });
 
 evaluate("Context Handling: Multiple Chunks", async ({httpClient}) => {
@@ -107,9 +89,5 @@ evaluate("Context Handling: Multiple Chunks", async ({httpClient}) => {
 
   const data: LLMResponseSchema = await res.json();
 
-  await expect({
-    query: query,
-    response: data.content,
-    context: context
-  }).toBeFaithful();
+  await expect(query, context, data.content).toBeFaithful();
 });

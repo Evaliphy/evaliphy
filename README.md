@@ -98,15 +98,12 @@ evaluate("Return Policy Chat", async ({ httpClient }) => {
   // 2. Assert in plain English
   await expect({
     query: sample.query,
-    response: data.answer,
-    context: sample.expectedContext
+    context: sample.expectedContext,
+    response: data.answer
   }).toBeFaithful();
 
-  await expect({
-    query: sample.query,
-    response: data.answer,
-    context: sample.expectedContext
-  }).toBeRelevant({threshold:0.7});
+  // Or use positional arguments for simplicity
+  await expect(sample.query, sample.expectedContext, data.answer).toBeRelevant({ threshold: 0.7 });
 });
 ```
 

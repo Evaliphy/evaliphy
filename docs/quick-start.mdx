@@ -60,7 +60,7 @@ export default defineConfig({
 ```
 Evaliphy uses gpt-4o-mini by default. You can use any OpenAI-compatible provider including OpenRouter, Azure OpenAI, or a local model.
 
-4. Write your first evaluation
+## 4. Write your first evaluation
 Open evals/example.eval.ts and replace the contents with a real evaluation against your RAG API:
 ```typescript
 import { evaluate, expect } from 'evaliphy';
@@ -74,18 +74,14 @@ evaluate('answer quality', async ({ httpClient }) => {
   const llmReply = await data.json();
 
   // 2. assert the response is relevant to the query
-  await expect({
-    query,
-    response: llmReply.answer,
-    context,
-  }).toBeRelevant(); // default threshold is 0.7
+  await expect(query, context, llmReply.answer).toBeRelevant(); // default threshold is 0.7
 
   // 3. assert the response is faithful to the retrieved context
   await expect({
     query,
-    response: llmReply.answer,
     context,
-  }).toBeFaithful({threshold: 0.8});
+    response: llmReply.answer,
+  }).toBeFaithful({ threshold: 0.8 });
 });
 
 ```
@@ -95,8 +91,8 @@ toBeRelevant() — does the response actually address the query
 toBeFaithful() — does the response stay grounded in the retrieved context without hallucinating
 
 
-5. Run your evaluations
-```bash 
+## 5. Run your evaluations
+```bash
 npm test
 ```
 
