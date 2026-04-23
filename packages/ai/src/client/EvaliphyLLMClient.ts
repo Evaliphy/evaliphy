@@ -1,6 +1,6 @@
 import {
-  generateObject,
   generateText,
+  Output,
   LanguageModel,
 } from 'ai';
 import { EvaliphyError, EvaliphyErrorCode, ILLMClient, LLMJudgeConfig, LLMObjectResponse, LLMResponse, LLMUsage, logger } from '@evaliphy/core';
@@ -53,12 +53,12 @@ export class EvaliphyLLMClient implements ILLMClient {
     logger.debug({ model: this.config.model, provider: this.config.provider.type, prompt }, 'Generating object');
     const start = Date.now();
     try {
-      const result = await generateObject({
+      const result = await generateText({
         model: this.model,
         prompt,
-        schema,
+        output: Output.object({ schema }),
         temperature: this.config.temperature,
-        maxTokens: this.config.maxTokens,
+        // Note: maxTokens is not supported in the Output.object overload of generateText
         abortSignal: this.config.timeout
           ? AbortSignal.timeout(this.config.timeout)
           : undefined,
@@ -72,10 +72,10 @@ export class EvaliphyLLMClient implements ILLMClient {
         durationMs,
       };
 
-      logger.debug({ usage, object: result.object }, 'Object generation successful');
+      logger.debug({ usage, object: result.output }, 'Object generation successful');
 
       return {
-        object: result.object as T,
+        object: result.output as T,
         llmUsages: usage,
         model: this.config.model,
       };
