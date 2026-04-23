@@ -49,5 +49,6 @@ runner.sh
 .roo/*
 
 e2e-tests/report/**
+e2e-tests/reports/**
 e2e-tests/node_modules/**
 **/node_modules/
