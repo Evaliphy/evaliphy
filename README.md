@@ -1,14 +1,14 @@
 # Evaliphy (Beta)
 
 <p align="center">
-  <strong>AI Evaluation Framework — Assertions for LLM-as-Judge</strong>
+  <strong>AI Evaluation Framework</strong>
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@evaliphy/sdk"><img src="https://img.shields.io/npm/v/@evaliphy/sdk/beta.svg" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/evaliphy"><img src="https://img.shields.io/npm/v/@evaliphy/sdk/beta.svg" alt="npm version" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
   <a href="https://evaliphy.com"><img src="https://img.shields.io/badge/docs-latest-blue.svg" alt="Documentation" /></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg" alt="Node.js version" /></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D24.0.0-brightgreen.svg" alt="Node.js version" /></a>
 </p>
 
 ---
