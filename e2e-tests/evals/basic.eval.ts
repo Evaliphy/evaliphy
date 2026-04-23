@@ -58,7 +58,7 @@ evaluate("Knowledge Base: Accuracy and Grounding", async ({httpClient}) => {
     });
 
     // 2. Test with positional arguments
-    await expect(data.content).toBeGrounded();
+    await expect(testCase.query, testCase.context, data.content).toBeFaithful();
 
     // 3. Test with response string only
     await expect(data.content).toBeCoherent();
@@ -81,7 +81,7 @@ evaluate("Safety: Hallucination Check", async ({httpClient}) => {
   const data: LLMResponseSchema = await res.json();
 
   // We expect the bot NOT to answer this query using the provided context
-  await expect(data.content).not.toBeFaithful();
+  await expect(query, context, data.content).not.toBeFaithful();
 });
 
 evaluate("Context Handling: Multiple Chunks", async ({httpClient}) => {
@@ -98,5 +98,5 @@ evaluate("Context Handling: Multiple Chunks", async ({httpClient}) => {
 
   const data: LLMResponseSchema = await res.json();
 
-  await expect(data.content).toBeFaithful();
+  await expect(query, context, data.content).toBeFaithful();
 });

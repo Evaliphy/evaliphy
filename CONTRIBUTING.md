@@ -99,7 +99,6 @@ evaliphy/
 │   └── evaliphy.config.ts  # Test configuration
 ├── docs/              # Documentation source
 ├── src/               # Entry points
-└── website/           # Documentation website
 ```
 
 ---
