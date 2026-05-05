@@ -1,7 +1,6 @@
-# Evaliphy (Beta)
-
+# Evaliphy
 <div>
-  <img src="docs/banner.svg" alt="Evaliphy" width="800">
+  <img src="./docs/banner.png" alt="Evaliphy" width="800">
   <br><br>
 </div>
 <p align="center">
@@ -13,11 +12,10 @@
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
   <a href="https://evaliphy.com"><img src="https://img.shields.io/badge/docs-latest-blue.svg" alt="Documentation" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D24.0.0-brightgreen.svg" alt="Node.js version" /></a>
-  <a href="http://makeapullrequest.com"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome" /></a>
 </p>
 
 ---
-> Star to stay updated. [Contributions welcome!](#contributing)
+> ⭐️ Star to stay updated. [Contributions welcome!](#contributing)
 ---
 
 Evaliphy is an AI system tool that treats your AI system as a black box. Write assertions against your real API, get structured results, and catch regressions in CI — without touching your pipeline internals or writing prompt engineering from scratch.
