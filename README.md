@@ -1,7 +1,10 @@
-# Evaliphy (Beta)
-
+# Evaliphy
+<div align="center">
+  <img src="./docs/banner.png" alt="Evaliphy" width="800">
+  <br><br>
+</div>
 <p align="center">
-  <strong>AI Evaluation Framework</strong>
+  <strong>E2E AI system testing tool</strong>
 </p>
 
 <p align="center">
@@ -11,9 +14,16 @@
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D24.0.0-brightgreen.svg" alt="Node.js version" /></a>
 </p>
 
+<div align="center">
+<br>
+  <a href="#quick-start">Quick start</a> · <a href="#assertions">Assertions</a> · <a href="#supported-llm-providers">LLM Providers</a> · <a href="#ci-integration">CI Integration</a> · <a href="#project-structure">Project Structure</a> 
+</div>
+
+---
+> ⭐️ Star to stay updated. [Contributions welcome!](#contributing)
 ---
 
-Evaliphy is an AI evaluation framework that treats your AI system as a black box. Write assertions against your real API, get structured results, and catch regressions in CI — without touching your pipeline internals or writing prompt engineering from scratch.
+Evaliphy is an AI system tool that treats your AI system as a black box. Write assertions against your real API, get structured results, and catch regressions in CI — without touching your pipeline internals or writing prompt engineering from scratch.
 
 Built-in LLM-as-Judge assertions handle the hard parts. You focus on writing evaluations, not wiring up models.
 
