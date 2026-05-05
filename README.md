@@ -14,6 +14,11 @@
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D24.0.0-brightgreen.svg" alt="Node.js version" /></a>
 </p>
 
+<div>
+<br>
+  <a href="#quick-start">Quick start</a> · <a href="#assertions">Assertions</a> · <a href="#supported-llm-providers">LLM Providers</a> · <a href="#ci-integration">CI Integration</a> · <a href="#project-structure">Project Structure</a> 
+</div>
+
 ---
 > ⭐️ Star to stay updated. [Contributions welcome!](#contributing)
 ---
