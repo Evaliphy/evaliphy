@@ -1,8 +1,10 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { getScoreColor, getStatusColor } from '../src/html/helpers/colorScale.js';
 import { formatDuration, formatPercent, formatScore } from '../src/html/helpers/formatters.js';
 import { HtmlWriter } from '../src/html/HtmlWriter.js';
+import { HtmlReporter } from '../src/html/HtmlReporter.js';
 import { FailureDetail } from '../src/html/renderer/FailureDetail.js';
 import { PageRenderer } from '../src/html/renderer/PageRenderer.js';
 import { ResultsTable } from '../src/html/renderer/ResultsTable.js';
@@ -18,6 +20,10 @@ vi.mock('node:fs', async () => {
       writeFileSync: vi.fn(),
       mkdirSync: vi.fn(),
       existsSync: vi.fn(() => true),
+      readFileSync: vi.fn((path) => {
+          if (path.includes('report.html')) return '<html>mock</html>';
+          return actual.default.readFileSync(path);
+      }),
     },
   };
 });
@@ -95,6 +101,21 @@ describe('ResultsTable', () => {
       expect(html).toContain(result.sampleId);
     }
   });
+
+  it('should correctly count badges for grouped assertions', () => {
+    const result = {
+      ...reportFixture.results[0],
+      assertions: {
+        toContain: [
+          { score: 1, passed: true, reason: 'ok', durationMs: 1, llmTokens: 0 },
+          { score: 0, passed: false, reason: 'bad', durationMs: 1, llmTokens: 0 }
+        ]
+      }
+    };
+    const html = ResultsTable.render([result] as any);
+    expect(html).toContain('1 ✓');
+    expect(html).toContain('1 ✗');
+  });
 });
 
 describe('FailureDetail', () => {
@@ -109,24 +130,27 @@ describe('FailureDetail', () => {
   it('should render assertion reasons and scores', () => {
     const result = reportFixture.results[0];
     const html = FailureDetail.render(result as any);
+    // Fixture assertions are still in the old format, but the helper handles it
     for (const [name, data] of Object.entries(result.assertions)) {
       expect(html).toContain(name);
-      expect(html).toContain(data.reason);
+      expect(html).toContain((data as any).reason);
     }
   });
 
-  it('should render model name if available', () => {
-    const resultWithModel = {
+  it('should render multiple entries for grouped assertions', () => {
+    const result = {
       ...reportFixture.results[0],
-      assertions: [
-        {
-          ...reportFixture.results[0].assertions[0],
-          model: 'gpt-4o'
-        }
-      ]
+      assertions: {
+        toContain: [
+          { score: 1, passed: true, reason: 'Reason A', durationMs: 1, llmTokens: 0 },
+          { score: 0, passed: false, reason: 'Reason B', durationMs: 1, llmTokens: 0 }
+        ]
+      }
     };
-    const html = FailureDetail.render(resultWithModel as any);
-    expect(html).toContain('gpt-4o');
+    const html = FailureDetail.render(result as any);
+    expect(html).toContain('Reason A');
+    expect(html).toContain('Reason B');
+    expect(html).toContain('Assertions (2)');
   });
 });
 

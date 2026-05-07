@@ -106,22 +106,25 @@ export class RunReportBuilder {
     };
   }
 
-  append(result: RunResult) {
+  append(result: RunResult | any) {
     this.report.results?.push(result);
     
     // Update assertion stats
-    for (const data of result.assertions) {
-      const assertionName = data.name.replace(/\(\)$/, '');
-      if (!this.assertionStats[assertionName]) {
-        this.assertionStats[assertionName] = { total: 0, passed: 0, scores: [] };
+    const assertionsToIterate = result._originalAssertions || result.assertions;
+    if (assertionsToIterate && Array.isArray(assertionsToIterate)) {
+      for (const data of assertionsToIterate) {
+        const assertionName = data.name.replace(/\(\)$/, '');
+        if (!this.assertionStats[assertionName]) {
+          this.assertionStats[assertionName] = { total: 0, passed: 0, scores: [] };
+        }
+        this.assertionStats[assertionName].total++;
+        if (data.passed) this.assertionStats[assertionName].passed++;
+        this.assertionStats[assertionName].scores.push(data.score);
       }
-      this.assertionStats[assertionName].total++;
-      if (data.passed) this.assertionStats[assertionName].passed++;
-      this.assertionStats[assertionName].scores.push(data.score);
     }
   }
 
-  appendError(payload: { testName: string; error: Error; duration: number; result?: RunResult }) {
+  appendError(payload: { testName: string; error: Error; duration: number; result?: RunResult | any }) {
     const error = payload.error;
     
     // Try to get the result from payload or context
@@ -141,7 +144,7 @@ export class RunReportBuilder {
       if (error.name === 'DeterministicAssertionError') {
         const detResult = (error as any).result;
         if (detResult && detResult.assertionName) {
-            result.assertions.push({
+            const newAssertion = {
                 name: detResult.assertionName,
                 score: detResult.score,
                 passed: detResult.passed,
@@ -149,7 +152,26 @@ export class RunReportBuilder {
                 durationMs: detResult.durationMs,
                 llmTokens: 0,
                 model: 'deterministic'
-            });
+            };
+            
+            // Handle both transformed and non-transformed results
+            if (result._originalAssertions) {
+              result._originalAssertions.push(newAssertion);
+              // Also update the transformed assertions object
+              if (!result.assertions[detResult.assertionName]) {
+                result.assertions[detResult.assertionName] = [];
+              }
+              result.assertions[detResult.assertionName].push({
+                score: detResult.score,
+                passed: detResult.passed,
+                reason: detResult.reason,
+                durationMs: detResult.durationMs,
+                llmTokens: 0,
+                model: 'deterministic'
+              });
+            } else {
+              result.assertions.push(newAssertion);
+            }
         }
       }
 

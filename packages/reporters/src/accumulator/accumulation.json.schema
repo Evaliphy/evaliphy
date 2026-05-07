@@ -100,18 +100,22 @@
 
           "assertions": {
             "type": "object",
-            "description": "keyed by assertion name",
+            "description": "keyed by assertion name, value is an array of results",
             "additionalProperties": {
-              "type": "object",
-              "required": ["score", "passed", "reason", "durationMs", "llmTokens"],
-              "additionalProperties": false,
-              "properties": {
-                "score":      { "type": "number", "minimum": 0, "maximum": 1 },
-                "passed":     { "type": "boolean" },
-                "reason":     { "type": "string" },
-                "threshold":  { "type": "number", "minimum": 0, "maximum": 1 },
-                "durationMs": { "type": "number" }
-                "llmTokens": { "type": "number" }
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["score", "passed", "reason", "durationMs", "llmTokens"],
+                "additionalProperties": false,
+                "properties": {
+                  "score":      { "type": "number", "minimum": 0, "maximum": 1 },
+                  "passed":     { "type": "boolean" },
+                  "reason":     { "type": "string" },
+                  "threshold":  { "type": "number", "minimum": 0, "maximum": 1 },
+                  "durationMs": { "type": "number" },
+                  "llmTokens":  { "type": "number" },
+                  "model":      { "type": "string" }
+                }
               }
             }
           },
