@@ -67,8 +67,9 @@ export class ResultsTable {
       }
     } else {
       // Handle grouped object { name: Array }
-      for (const name in assertions) {
-        const list = assertions[name];
+      const assertionsObj = assertions as Record<string, any[]>;
+      for (const name in assertionsObj) {
+        const list = assertionsObj[name];
         if (Array.isArray(list)) {
           for (const a of list) {
             if (a.passed) passed++;
@@ -94,8 +95,9 @@ export class ResultsTable {
     if (Array.isArray(assertions)) return assertions;
     
     const flat: any[] = [];
-    for (const name in assertions) {
-      const list = assertions[name];
+    const assertionsObj = assertions as Record<string, any[]>;
+    for (const name in assertionsObj) {
+      const list = assertionsObj[name];
       if (Array.isArray(list)) {
         for (const a of list) {
           flat.push({ ...a, name });
