@@ -35,7 +35,7 @@ async function runSingle(evalCase: EvalTest, config: EvaliphyConfig, runId: stri
         evalFile: path.relative(process.cwd(), file),
         status: 'passed',
         inputs: { query: '', context: '', response: '' },
-        assertions: {},
+        assertions: [],
         http: { status: 0, url: '', method: 'POST' },
         timings: { ttfb: 0, total: 0 }
     };

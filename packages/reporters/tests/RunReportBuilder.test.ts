@@ -30,9 +30,9 @@ describe('RunReportBuilder', () => {
       evalFile: 'file1.eval.ts',
       status: 'passed',
       inputs: { query: 'q1', context: 'c1', response: 'r1' },
-      assertions: {
-        'toBeFaithful()': { score: 0.9, passed: true, reason: 'good', durationMs: 100, llmTokens: 50 }
-      },
+      assertions: [
+        { name: 'toBeFaithful()', score: 0.9, passed: true, reason: 'good', durationMs: 100, llmTokens: 50 }
+      ],
       http: { status: 200, url: 'url1', method: 'POST' },
       timings: { ttfb: 10, total: 50 }
     };
@@ -42,9 +42,9 @@ describe('RunReportBuilder', () => {
       evalFile: 'file1.eval.ts',
       status: 'failed',
       inputs: { query: 'q2', context: 'c2', response: 'r2' },
-      assertions: {
-        'toBeFaithful()': { score: 0.4, passed: false, reason: 'bad', durationMs: 120, llmTokens: 60 }
-      },
+      assertions: [
+        { name: 'toBeFaithful()', score: 0.4, passed: false, reason: 'bad', durationMs: 120, llmTokens: 60 }
+      ],
       http: { status: 200, url: 'url2', method: 'POST' },
       timings: { ttfb: 15, total: 60 }
     };

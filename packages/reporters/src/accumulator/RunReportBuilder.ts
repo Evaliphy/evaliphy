@@ -1,4 +1,4 @@
-import { EvaliphyConfig } from '@evaliphy/core';
+import { EvaliphyConfig, getResult } from '@evaliphy/core';
 
 export interface RunReport {
   meta: {
@@ -48,7 +48,8 @@ export interface RunResult {
     response: string;
     expected?: string;
   };
-  assertions: Record<string, {
+  assertions: Array<{
+    name: string;
     score: number;
     passed: boolean;
     reason: string;
@@ -109,8 +110,8 @@ export class RunReportBuilder {
     this.report.results?.push(result);
     
     // Update assertion stats
-    for (const [name, data] of Object.entries(result.assertions)) {
-      const assertionName = name.replace(/\(\)$/, '');
+    for (const data of result.assertions) {
+      const assertionName = data.name.replace(/\(\)$/, '');
       if (!this.assertionStats[assertionName]) {
         this.assertionStats[assertionName] = { total: 0, passed: 0, scores: [] };
       }
@@ -121,16 +122,79 @@ export class RunReportBuilder {
   }
 
   appendError(payload: { testName: string; error: Error; duration: number; result?: RunResult }) {
-    if (payload.result) {
+    const error = payload.error;
+    
+    // Try to get the result from payload or context
+    let result = payload.result || getResult();
+
+    if (result) {
       // If we have a result object, ensure it has the error details
-      if (!payload.result.error && !payload.error.message.includes('failed:')) {
-        payload.result.error = {
-          message: payload.error.message,
-          type: payload.error.name,
-          stack: payload.error.stack
+      if (!result.error && !error.message.includes('failed:')) {
+        result.error = {
+          message: error.message,
+          type: error.name,
+          stack: error.stack
         };
       }
-      this.append(payload.result);
+      
+      // If it's a DeterministicAssertionError, ensure the failing assertion is recorded
+      if (error.name === 'DeterministicAssertionError') {
+        const detResult = (error as any).result;
+        if (detResult && detResult.assertionName) {
+            result.assertions.push({
+                name: detResult.assertionName,
+                score: detResult.score,
+                passed: detResult.passed,
+                reason: detResult.reason,
+                durationMs: detResult.durationMs,
+                llmTokens: 0,
+                model: 'deterministic'
+            });
+        }
+      }
+
+      this.append(result);
+      return;
+    }
+
+    if (error.name === 'DeterministicAssertionError') {
+      const detResult = (error as any).result;
+      const newResult: RunResult = {
+        sampleId: payload.testName,
+        evalFile: 'unknown',
+        status: 'failed',
+        inputs: {
+          query: '',
+          context: '',
+          response: ''
+        },
+        assertions: [
+          {
+            name: detResult.assertionName,
+            score: detResult.score,
+            passed: detResult.passed,
+            reason: detResult.reason,
+            durationMs: detResult.durationMs,
+            llmTokens: 0,
+            model: 'deterministic'
+          }
+        ],
+        http: {
+          status: 0,
+          url: '',
+          method: 'POST'
+        },
+        timings: {
+          ttfb: 0,
+          total: payload.duration
+        },
+        error: {
+          message: error.message,
+          type: error.name,
+          stack: error.stack
+        }
+      };
+      this.append(newResult);
       return;
     }
 
@@ -143,7 +207,7 @@ export class RunReportBuilder {
         context: '',
         response: ''
       },
-      assertions: {},
+      assertions: [],
       http: {
         status: 0,
         url: '',

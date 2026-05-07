@@ -4,7 +4,7 @@ import { formatScore } from '../helpers/formatters.js';
 
 export class FailureDetail {
   static render(result: RunResult): string {
-    const assertions = Object.entries(result.assertions || {});
+    const assertions = result.assertions || [];
     
     return `
       <div class="detail-content">
@@ -25,11 +25,11 @@ export class FailureDetail {
           <div class="assertions-section">
             <div class="detail-section-title">Assertions (${assertions.length})</div>
             <div class="assertion-list">
-              ${assertions.map(([name, data]) => `
+              ${assertions.map((data) => `
                 <div class="assertion-card ${data.passed ? 'passed' : 'failed'}">
                   <div class="assertion-card-header">
                     <div class="assertion-card-name">
-                      <span class="assertion-name">${name}</span>
+                      <span class="assertion-name">${data.name}</span>
                       <span class="status-badge status-${data.passed ? 'passed' : 'failed'}">
                         ${data.passed ? 'PASSED' : 'FAILED'}
                       </span>

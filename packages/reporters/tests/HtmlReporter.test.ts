@@ -118,12 +118,12 @@ describe('FailureDetail', () => {
   it('should render model name if available', () => {
     const resultWithModel = {
       ...reportFixture.results[0],
-      assertions: {
-        toBeFaithful: {
-          ...reportFixture.results[0].assertions.toBeFaithful,
+      assertions: [
+        {
+          ...reportFixture.results[0].assertions[0],
           model: 'gpt-4o'
         }
-      }
+      ]
     };
     const html = FailureDetail.render(resultWithModel as any);
     expect(html).toContain('gpt-4o');

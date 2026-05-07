@@ -23,6 +23,7 @@ export interface TestPassPayload {
   runId: string;
   testName: string;
   duration: number;
+  result?: any;
 }
 
 export interface TestFailPayload {
@@ -30,6 +31,7 @@ export interface TestFailPayload {
   testName: string;
   duration: number;
   error: Error;
+  result?: any;
 }
 
 export interface TestRetryPayload {

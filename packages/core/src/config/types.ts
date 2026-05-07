@@ -20,6 +20,14 @@ export interface HttpConfig {
   headers?: Record<string, string>
 }
 
+export interface DeterministicConfig {
+  /**
+   * If true, the first failed deterministic assertion will throw and stop the test.
+   * If false (default), failures are recorded but execution continues (soft assertions).
+   */
+  failFast?: boolean
+}
+
 export interface LLMJudgeConfig {
   // the model string — provider-prefixed like "openai/gpt-4o-mini"
   // or just "gpt-4o-mini" when provider is explicit
@@ -68,6 +76,10 @@ export interface EvaliphyConfig {
    * LLM as Judge Config
    */
   llmAsJudgeConfig?: LLMJudgeConfig
+  /**
+   * Deterministic Assertions Config
+   */
+  deterministicConfig?: DeterministicConfig
   /**
    * Config file to use
    */

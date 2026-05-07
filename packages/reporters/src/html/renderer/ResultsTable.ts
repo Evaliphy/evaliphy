@@ -29,7 +29,7 @@ export class ResultsTable {
 
   private static renderRow(result: RunResult): string {
     const statusClass = result.status;
-    const isExpandable = result.status !== 'passed' || Object.keys(result.assertions).length > 0;
+    const isExpandable = result.status !== 'passed' || result.assertions.length > 0;
     
     return `
       <tr class="main-row ${statusClass} ${isExpandable ? 'expandable' : ''}" data-status="${result.status}">
@@ -53,7 +53,7 @@ export class ResultsTable {
   }
 
   private static renderAssertionBadges(result: RunResult): string {
-    const assertions = Object.values(result.assertions);
+    const assertions = result.assertions;
     if (assertions.length === 0) return '';
 
     const passed = assertions.filter(a => a.passed).length;

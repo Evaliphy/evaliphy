@@ -40,7 +40,9 @@ describe('JsonAccumulator', () => {
       sampleId: 'test-1',
       evalFile: 'file1.eval.ts',
       status: 'passed',
-      assertions: { a: { score: 1, passed: true, durationMs: 1, llmTokens: 1 } },
+      assertions: [{ name: 'a', score: 1, passed: true, durationMs: 1, llmTokens: 1 },
+        { name: 'b', score: 1, passed: true, durationMs: 1, llmTokens: 1 }
+      ],
       inputs: { query: 'q', context: 'c', response: 'r' },
       http: { status: 200, url: 'u', method: 'POST' },
       timings: { ttfb: 1, total: 1 }
@@ -69,6 +71,7 @@ describe('JsonAccumulator', () => {
 
     expect(onComplete).toHaveBeenCalled();
     const report = onComplete.mock.calls[0][0];
+    
     expect(report.results).toHaveLength(2);
     expect(report.summary.passed).toBe(1);
     expect(report.summary.failed).toBe(1);
