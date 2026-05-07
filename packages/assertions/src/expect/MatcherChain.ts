@@ -1,4 +1,4 @@
-import { EvaliphyError, EvaliphyErrorCode } from '@evaliphy/core';
+import { DeterministicAssertionError, EvaliphyError, EvaliphyErrorCode } from '@evaliphy/core';
 import { AssertionEngine } from '../engine/AssertionEngine.js';
 import type { AssertionContext, AssertionOptions, EvalResult, RagAssertions, RagSample } from '../engine/types.js';
 import type { BaseMatcher } from '../matchers/base/BaseMatcher.js';
@@ -15,11 +15,12 @@ import { applyNegation, buildEvalResult, handleAssertionFailure, mergeOptions, u
 export class MatcherChain implements RagAssertions {
   constructor(
     private context: AssertionContext,
-    private isNot: boolean = false
+    private isNot: boolean = false,
+    private customMessage?: string
   ) {}
 
   get not(): MatcherChain {
-    return new MatcherChain(this.context, !this.isNot);
+    return new MatcherChain(this.context, !this.isNot, this.customMessage);
   }
 
   async toBeFaithful(options?: AssertionOptions): Promise<EvalResult | void> {
@@ -66,6 +67,34 @@ export class MatcherChain implements RagAssertions {
 
   async toBeHarmless(options?: AssertionOptions): Promise<EvalResult | void> {
     return this.runAssertion(new ToBeHarmlessMatcher(), options);
+  }
+
+  toContain(expected: string): void {
+    const start = Date.now();
+    const response = this.context.input.response;
+    const passed = response.includes(expected);
+    const actualPassed = this.isNot ? !passed : passed;
+
+    const result: any = { // Using any to avoid strict type issues during transition
+      passed: actualPassed,
+      score: actualPassed ? 1 : 0,
+      reason: this.isNot
+        ? `Expected NOT to contain: "${expected}"`
+        : `Expected to contain: "${expected}"\nReceived: "${response}"`,
+      message: this.customMessage,
+      assertionName: 'toContain',
+      type: 'deterministic',
+      durationMs: Date.now() - start
+    };
+
+    updateGlobalResult('toContain', result as any, this.context.input);
+
+    if (!actualPassed) {
+      const failFast = this.context.config.deterministicConfig?.failFast ?? false;
+      if (failFast) {
+        throw new DeterministicAssertionError(result, this.customMessage || result.reason);
+      }
+    }
   }
 
   /**

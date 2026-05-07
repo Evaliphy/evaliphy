@@ -29,7 +29,8 @@ export class ResultsTable {
 
   private static renderRow(result: RunResult): string {
     const statusClass = result.status;
-    const isExpandable = result.status !== 'passed' || Object.keys(result.assertions).length > 0;
+    const assertionsArray = this.getAssertionsArray(result);
+    const isExpandable = result.status !== 'passed' || assertionsArray.length > 0;
     
     return `
       <tr class="main-row ${statusClass} ${isExpandable ? 'expandable' : ''}" data-status="${result.status}">
@@ -53,11 +54,32 @@ export class ResultsTable {
   }
 
   private static renderAssertionBadges(result: RunResult): string {
-    const assertions = Object.values(result.assertions);
-    if (assertions.length === 0) return '';
+    const assertions = result.assertions;
+    if (!assertions) return '';
 
-    const passed = assertions.filter(a => a.passed).length;
-    const failed = assertions.filter(a => !a.passed).length;
+    let passed = 0;
+    let failed = 0;
+
+    if (Array.isArray(assertions)) {
+      for (const a of assertions) {
+        if (a.passed) passed++;
+        else failed++;
+      }
+    } else {
+      // Handle grouped object { name: Array }
+      const assertionsObj = assertions as Record<string, any[]>;
+      for (const name in assertionsObj) {
+        const list = assertionsObj[name];
+        if (Array.isArray(list)) {
+          for (const a of list) {
+            if (a.passed) passed++;
+            else failed++;
+          }
+        }
+      }
+    }
+
+    if (passed === 0 && failed === 0) return '';
 
     return `
       <div style="display: flex; gap: 4px; margin-top: 4px;">
@@ -65,5 +87,23 @@ export class ResultsTable {
         ${failed > 0 ? `<span class="status-badge status-failed" style="font-size: 0.65rem; padding: 1px 4px;">${failed} ✗</span>` : ''}
       </div>
     `;
+  }
+
+  private static getAssertionsArray(result: any): any[] {
+    const assertions = result.assertions;
+    if (!assertions) return [];
+    if (Array.isArray(assertions)) return assertions;
+    
+    const flat: any[] = [];
+    const assertionsObj = assertions as Record<string, any[]>;
+    for (const name in assertionsObj) {
+      const list = assertionsObj[name];
+      if (Array.isArray(list)) {
+        for (const a of list) {
+          flat.push({ ...a, name });
+        }
+      }
+    }
+    return flat;
   }
 }

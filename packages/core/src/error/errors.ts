@@ -40,3 +40,13 @@ export class EvaliphyError extends Error {
     this.name = 'EvaliphyError'
   }
 }
+
+export class DeterministicAssertionError extends Error {
+  constructor(
+    public readonly result: any, // Using any to avoid circular dependency if needed, but will be DeterministicAssertionResult
+    message: string
+  ) {
+    super(message);
+    this.name = 'DeterministicAssertionError';
+  }
+}

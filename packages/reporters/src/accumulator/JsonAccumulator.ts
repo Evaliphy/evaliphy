@@ -1,14 +1,15 @@
 import {
-  DiscoveryEndPayload,
-  DiscoveryFilePayload,
-  DiscoveryStartPayload,
-  EvaliphyReporter,
-  RunEndPayload,
-  RunStartPayload,
-  TestFailPayload,
-  TestPassPayload,
-  TestRetryPayload,
-  TestStartPayload,
+    DiscoveryEndPayload,
+    DiscoveryFilePayload,
+    DiscoveryStartPayload,
+    EvaliphyReporter,
+    logger,
+    RunEndPayload,
+    RunStartPayload,
+    TestFailPayload,
+    TestPassPayload,
+    TestRetryPayload,
+    TestStartPayload,
 } from '@evaliphy/core';
 import { RunReport, RunReportBuilder, RunResult } from './RunReportBuilder.js';
 
@@ -41,34 +42,75 @@ export class JsonAccumulator implements EvaliphyReporter {
   }
 
   onTestPass(payload: TestPassPayload): void {
-    // Note: TestPassPayload currently doesn't have the full RunResult.
-    // In a real scenario, we'd need to capture the result from the execution context
-    // or have it passed in the payload. For now, we'll map what we have.
-    // This might need adjustment once we have a way to get the full result.
-    
-    // If the payload had a 'result' property, we'd use it.
-    const result = (payload as any).result as RunResult;
+    const result = payload.result as RunResult;
     if (result) {
-      this.builder.append(result);
+      logger.debug({ 
+        sampleId: result.sampleId, 
+        assertionCount: result.assertions?.length,
+        assertions: result.assertions?.map(a => a.name)
+      }, 'JsonAccumulator: onTestPass');
+      this.builder.append(this.transformResult(result));
     }
   }
 
   onTestFail(payload: TestFailPayload): void {
-    const result = (payload as any).result as RunResult;
+    const result = payload.result as RunResult;
+    logger.debug({ 
+      sampleId: payload.testName, 
+      hasResult: !!result,
+      assertionCount: result?.assertions?.length 
+    }, 'JsonAccumulator: onTestFail');
     this.builder.appendError({
       testName: payload.testName,
       error: payload.error,
       duration: payload.duration,
-      result
+      result: result ? this.transformResult(result) : undefined
     });
   }
 
+  private transformResult(result: RunResult): any {
+    const assertions: Record<string, any[]> = {};
+    for (const assertion of result.assertions) {
+      if (!assertions[assertion.name]) {
+        assertions[assertion.name] = [];
+      }
+      assertions[assertion.name].push({
+        score: assertion.score,
+        passed: assertion.passed,
+        reason: assertion.reason,
+        threshold: assertion.threshold,
+        durationMs: assertion.durationMs,
+        llmTokens: assertion.llmTokens,
+        model: assertion.model
+      });
+    }
+
+    logger.debug({ 
+      sampleId: result.sampleId, 
+      groupedAssertions: Object.keys(assertions).map(k => `${k}: ${assertions[k].length}`)
+    }, 'JsonAccumulator: transformResult complete');
+
+    return {
+      ...result,
+      _originalAssertions: result.assertions,
+      assertions
+    };
+  }
+
   async onRunEnd(payload: RunEndPayload): Promise<void> {
-    const report = this.builder.finalise({
+    const finalReport = this.builder.finalise({
       passed: payload.passed,
       failed: payload.failed,
       duration: payload.duration
     });
-    await this.onComplete(report);
+
+    // Strip internal _originalAssertions before sending report
+    if (finalReport.results) {
+      for (const res of finalReport.results) {
+        delete (res as any)._originalAssertions;
+      }
+    }
+
+    await this.onComplete(finalReport);
   }
 }

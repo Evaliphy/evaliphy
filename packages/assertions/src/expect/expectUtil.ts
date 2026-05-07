@@ -14,28 +14,44 @@ export function mergeOptions(context: AssertionContext, options?: AssertionOptio
 /**
  * Updates the global run result with the outcome of an assertion.
  */
-export function updateGlobalResult(matcherName: string, result: AssertionResult, input: EvalInput): void {
+export function updateGlobalResult(matcherName: string, result: AssertionResult | any, input: EvalInput): void {
   const runResult = getResult();
   if (runResult) {
-    runResult.assertions[matcherName] = {
-      score: result.score,
-      passed: result.passed,
-      reason: result.reason,
-      threshold: result.threshold,
-      durationMs: result.duration,
-      llmTokens: result.usage?.totalTokens || 0,
-      model: result.usage?.model,
-    };
-    
-    if ('query' in input && input.query) {
-      runResult.inputs.query = (input.query as string) || runResult.inputs.query;
+    if (result.type === 'deterministic') {
+      runResult.assertions.push({
+        name: matcherName,
+        score: result.score,
+        passed: result.passed,
+        reason: result.reason,
+        durationMs: result.durationMs,
+        llmTokens: 0,
+        model: 'deterministic',
+      });
+    } else {
+      const res = result as AssertionResult;
+      runResult.assertions.push({
+        name: matcherName,
+        score: res.score,
+        passed: res.passed,
+        reason: res.reason,
+        threshold: res.threshold,
+        durationMs: res.duration,
+        llmTokens: res.usage?.totalTokens || 0,
+        model: res.usage?.model,
+      });
     }
     
-    if ('context' in input && input.context) {
-      runResult.inputs.context = (Array.isArray(input.context) ? input.context.join('\n\n') : (input.context as string)) || runResult.inputs.context;
+    if ('query' in input && input.query && !runResult.inputs.query) {
+      runResult.inputs.query = (input.query as string);
     }
     
-    runResult.inputs.response = input.response || runResult.inputs.response;
+    if ('context' in input && input.context && !runResult.inputs.context) {
+      runResult.inputs.context = (Array.isArray(input.context) ? input.context.join('\n\n') : (input.context as string));
+    }
+    
+    if (input.response && !runResult.inputs.response) {
+      runResult.inputs.response = input.response;
+    }
   }
 }
 

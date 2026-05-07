@@ -128,16 +128,24 @@ export class ConsoleReporter implements EvaliphyReporter {
       this.failures.forEach((failure, index) => {
         console.log(`\n ${pc.red(`${index + 1}. ${failure.testName}`)}`);
         
-        if (failure.error instanceof EvaliphyError) {
-            console.log(`    ${pc.dim('Code:')}  ${pc.red(failure.error.code)}`);
-            console.log(`    ${pc.dim('Error:')} ${pc.white(failure.error.message)}`);
-            if (failure.error.hint) {
-                console.log(`    ${pc.dim('Hint:')}  ${pc.yellow(failure.error.hint)}`);
+        const error = failure.error;
+        if (error.name === 'DeterministicAssertionError') {
+            const result = (error as any).result;
+            console.log(`    ${pc.red(`✗ ${result.assertionName} failed:`)}`);
+            if (result.message) {
+                console.log(`    ${pc.white(result.message)}`);
+            }
+            console.log(`    ${pc.white(result.reason)}`);
+        } else if (error instanceof EvaliphyError) {
+            console.log(`    ${pc.dim('Code:')}  ${pc.red(error.code)}`);
+            console.log(`    ${pc.dim('Error:')} ${pc.white(error.message)}`);
+            if (error.hint) {
+                console.log(`    ${pc.dim('Hint:')}  ${pc.yellow(error.hint)}`);
             }
         } else {
-            console.log(`    ${pc.dim('Error:')} ${pc.red(failure.error.message)}`);
-            if (failure.error.stack && this.options.verbose) {
-                console.log(`\n${pc.dim(failure.error.stack)}`);
+            console.log(`    ${pc.dim('Error:')} ${pc.red(error.message)}`);
+            if (error.stack && this.options.verbose) {
+                console.log(`\n${pc.dim(error.stack)}`);
             }
         }
       });

@@ -4,7 +4,8 @@ import { formatScore } from '../helpers/formatters.js';
 
 export class FailureDetail {
   static render(result: RunResult): string {
-    const assertions = Object.entries(result.assertions || {});
+    const assertions = result.assertions || [];
+    const assertionsArray = this.getAssertionsArray(assertions);
     
     return `
       <div class="detail-content">
@@ -21,15 +22,15 @@ export class FailureDetail {
             <div class="detail-box">${this.escapeHtml(result.inputs.response || '')}</div>
           </div>
         </div>
-        ${assertions.length > 0 ? `
+        ${assertionsArray.length > 0 ? `
           <div class="assertions-section">
-            <div class="detail-section-title">Assertions (${assertions.length})</div>
+            <div class="detail-section-title">Assertions (${assertionsArray.length})</div>
             <div class="assertion-list">
-              ${assertions.map(([name, data]) => `
+              ${assertionsArray.map((data) => `
                 <div class="assertion-card ${data.passed ? 'passed' : 'failed'}">
                   <div class="assertion-card-header">
                     <div class="assertion-card-name">
-                      <span class="assertion-name">${name}</span>
+                      <span class="assertion-name">${data.name}</span>
                       <span class="status-badge status-${data.passed ? 'passed' : 'failed'}">
                         ${data.passed ? 'PASSED' : 'FAILED'}
                       </span>
@@ -73,6 +74,22 @@ export class FailureDetail {
         ` : ''}
       </div>
     `;
+  }
+
+  private static getAssertionsArray(assertions: any): any[] {
+    if (!assertions) return [];
+    if (Array.isArray(assertions)) return assertions;
+    
+    const flat: any[] = [];
+    for (const name in assertions) {
+      const list = assertions[name];
+      if (Array.isArray(list)) {
+        for (const a of list) {
+          flat.push({ ...a, name });
+        }
+      }
+    }
+    return flat;
   }
 
   private static escapeHtml(str: string): string {
