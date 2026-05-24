@@ -1,6 +1,4 @@
-import { EvaliphyError, EvaliphyErrorCode, logger } from '@evaliphy/core';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { EvaliphyError, EvaliphyErrorCode } from '@evaliphy/core';
 import type { BaseMatcher } from '../matchers/base/BaseMatcher.js';
 import { PromptLoader } from '../promptManager/promptLoader.js';
 import { PromptRenderer } from '../promptManager/promptRenderer.js';
@@ -8,12 +6,15 @@ import { assertionRegistry } from "../registry.js";
 import { type AssertionContext, type AssertionResult } from './types.js';
 
 export class AssertionEngine {
+  /**
+   * Runs the assertion logic, executing an LLM call if the matcher requires it.
+   */
   static async run(
     matcher: BaseMatcher,
     context: AssertionContext
   ): Promise<AssertionResult> {
     const startTime = Date.now();
-    const { input, options, llmClient, config } = context;
+    const { input, options, llmClient } = context;
 
     try {
       matcher.validate(input);
@@ -32,7 +33,6 @@ export class AssertionEngine {
         reason = parsed.reason;
         usage = response.llmUsages;
       }
-
 
       const threshold = options.threshold ?? 0.7;
       const passed = score >= threshold;
@@ -58,6 +58,10 @@ export class AssertionEngine {
     }
   }
 
+  /**
+   * Prepares the LLM prompt and schema for the assertion.
+   * Centralizes prompt loading through PromptLoader.
+   */
   private static prepareLLMRequest(matcher: BaseMatcher, context: AssertionContext) {
     const { input, config } = context;
     const assertionDef = assertionRegistry[matcher.name];
@@ -69,7 +73,8 @@ export class AssertionEngine {
       );
     }
 
-    const loadedPrompt = this.loadPrompt(matcher.name, assertionDef, config);
+    // Call the centralized PromptLoader to handle path resolution and loading
+    const loadedPrompt = PromptLoader.resolveAndLoad(matcher.name, assertionDef, config);
     const variables = this.prepareVariables(input);
     const finalPrompt = PromptRenderer.render(loadedPrompt.template, variables, assertionDef);
     const outputSchema = assertionDef.outputSchema.zodSchema as any;
@@ -77,67 +82,9 @@ export class AssertionEngine {
     return { finalPrompt, outputSchema };
   }
 
-  private static loadPrompt(matcherName: string, assertionDef: any, config: any) {
-    const configDir = config.configFile ? path.dirname(config.configFile) : process.cwd();
-
-    // 1. Check for custom prompts directory from config
-    const customPromptsDir = config.llmAsJudgeConfig?.promptsDir
-      ? path.resolve(configDir, config.llmAsJudgeConfig.promptsDir)
-      : null;
-
-    // 2. Check for default prompts directory in consumer's root (convention)
-    const localPromptsDir = path.join(process.cwd(), 'prompts');
-
-    // 3. SDK internal prompts directory
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    
-    // Support both source (../../prompts) and bundled dist (./prompts)
-    const sdkPromptsDirSource = path.resolve(__dirname, '../../prompts');
-    const sdkPromptsDirDist = path.resolve(__dirname, './prompts');
-
-    const searchPaths = [
-      customPromptsDir ? path.join(customPromptsDir, `${matcherName}.md`) : null,
-      path.join(localPromptsDir, `${matcherName}.md`),
-      path.join(sdkPromptsDirDist, `${matcherName}.md`),
-      path.join(sdkPromptsDirSource, `${matcherName}.md`),
-    ].filter(Boolean) as string[];
-
-    try {
-      // 1. Try custom prompts directory from config
-      if (customPromptsDir) {
-        const customPath = path.join(customPromptsDir, `${matcherName}.md`);
-        if (PromptLoader.exists(customPath)) {
-          return PromptLoader.load(customPath, assertionDef);
-        } else {
-          console.warn(`Custom prompt file not found at: ${customPath}. Falling back to defaults.`);
-        }
-      }
-
-      // 2. Try other search paths (local convention, SDK dist, SDK source)
-      const fallbackPaths = [
-        path.join(localPromptsDir, `${matcherName}.md`),
-        path.join(sdkPromptsDirDist, `${matcherName}.md`),
-        path.join(sdkPromptsDirSource, `${matcherName}.md`),
-      ];
-
-      for (const promptPath of fallbackPaths) {
-        if (PromptLoader.exists(promptPath)) {
-          return PromptLoader.load(promptPath, assertionDef);
-        }
-      }
-
-      // If none found, try the primary SDK path one last time to trigger the standard error
-      return PromptLoader.load(path.join(sdkPromptsDirDist, `${matcherName}.md`), assertionDef);
-    } catch (error: any) {
-      throw new EvaliphyError(
-        EvaliphyErrorCode.PROMPT_LOAD_ERROR,
-        `Failed to load prompt for "${matcherName}": ${error.message}`,
-        'Check your prompt file formatting and variables.',
-        error
-      );
-    }
-  }
-
+  /**
+   * Prepares the variables for the prompt renderer.
+   */
   private static prepareVariables(input: any) {
     return {
       ...Object.fromEntries(
@@ -149,6 +96,9 @@ export class AssertionEngine {
     } as Record<string, string>;
   }
 
+  /**
+   * Executes the actual LLM call using the provided client.
+   */
   private static async executeLLMCall(matcher: BaseMatcher, llmClient: any, prompt: string, schema: any) {
     try {
       return await llmClient.generateObject(prompt, schema);

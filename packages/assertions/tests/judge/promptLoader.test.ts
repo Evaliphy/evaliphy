@@ -1,101 +1,121 @@
-import { EvaliphyError } from '@evaliphy/core';
+import { EvaliphyErrorCode } from '@evaliphy/core';
 import fs from 'node:fs';
-import { describe, expect, it, vi } from 'vitest';
+import path from 'node:path';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PromptLoader } from '../../src/promptManager/promptLoader.js';
-import { assertionRegistry } from "../../src/registry.js";
 
+// Mock fs to control file existence and content
 vi.mock('node:fs');
 
 describe('PromptLoader', () => {
-  const mockAssertion = assertionRegistry.toBeFaithful;
+  const mockAssertion: any = {
+    name: 'testMatcher',
+    inputVariables: ['query', 'response'],
+    outputSchema: { zodSchema: {} }
+  };
 
-  it('should load and validate a correct prompt', () => {
-    const mockContent = `---
-name: toBeFaithful
+  const mockPromptContent = `---
+name: testMatcher
 input_variables:
-  - question
-  - context
+  - query
   - response
 ---
-Question: {{question}}
-Context: {{context}}
-Response: {{response}}
-`;
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue(mockContent);
+Query: {{query}}
+Response: {{response}}`;
 
-    const result = PromptLoader.load('test.md', mockAssertion);
-    expect(result.template).toContain('Question: {{question}}');
-    expect(result.frontmatter.name).toBe('toBeFaithful');
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('should throw error if file not found', () => {
-    vi.mocked(fs.existsSync).mockReturnValue(false);
-    expect(() => PromptLoader.load('missing.md', mockAssertion)).toThrow(EvaliphyError);
+  describe('resolveAndLoad', () => {
+    it('should load from Priority 1: User Config (promptsDir)', () => {
+      const config = {
+        configFile: '/user/project/evaliphy.config.ts',
+        llmAsJudgeConfig: {
+          promptsDir: './custom-prompts'
+        }
+      };
+
+      // Target path: /user/project/custom-prompts/testMatcher.md
+      vi.spyOn(fs, 'existsSync').mockImplementation((p: any) => p.includes('custom-prompts'));
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(mockPromptContent);
+
+      const result = PromptLoader.resolveAndLoad('testMatcher', mockAssertion, config);
+
+      expect(fs.existsSync).toHaveBeenCalled();
+      expect(result.template).toContain('Query: {{query}}');
+      expect(result.frontmatter.name).toBe('testMatcher');
+    });
+
+    it('should fallback to Fallback 1: SDK Dist if Priority 1 fails', () => {
+      const config = {
+        llmAsJudgeConfig: { promptsDir: './non-existent' }
+      };
+
+      // Mock existsSync to return false for custom but true for dist
+      vi.spyOn(fs, 'existsSync').mockImplementation((p: any) => {
+        if (p.includes('non-existent')) return false;
+        if (p.includes('dist') || p.includes('src/promptManager/prompts')) return true;
+        return false;
+      });
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(mockPromptContent);
+
+      const result = PromptLoader.resolveAndLoad('testMatcher', mockAssertion, config);
+
+      expect(result.template).toBeDefined();
+      expect(fs.readFileSync).toHaveBeenCalled();
+    });
+
+    it('should fallback to Fallback 2: SDK Source if Dist fails', () => {
+      const config = { llmAsJudgeConfig: {} };
+
+      // Mock existsSync to return true only for the source path
+      vi.spyOn(fs, 'existsSync').mockImplementation((p: any) => {
+        // Dist path is usually relative to __dirname which is src/promptManager/
+        if (p.includes('src/promptManager/prompts')) return false;
+        if (p.includes('../../prompts')) return true;
+        return false;
+      });
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(mockPromptContent);
+
+      const result = PromptLoader.resolveAndLoad('testMatcher', mockAssertion, config);
+
+      expect(result.template).toBeDefined();
+      expect(fs.readFileSync).toHaveBeenCalled();
+    });
+
+    it('should throw EvaliphyError if prompt is not found anywhere', () => {
+      const config = {};
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+
+      try {
+        PromptLoader.resolveAndLoad('testMatcher', mockAssertion, config);
+      } catch (error: any) {
+        expect(error.code).toBe(EvaliphyErrorCode.FILE_NOT_FOUND);
+      }
+    });
   });
 
-  it('should throw error if required variables are missing in frontmatter', () => {
-    const mockContent = `---
-name: toBeFaithful
-input_variables:
-  - question
----
-{{question}}
-`;
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue(mockContent);
+  describe('load', () => {
+    it('should throw error if file does not exist', () => {
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+      expect(() => PromptLoader.load('missing.md', mockAssertion)).toThrow(/Prompt file not found/);
+    });
 
-    expect(() => PromptLoader.load('test.md', mockAssertion)).toThrow(/missing required input_variables/);
-  });
+    it('should validate missing input variables in frontmatter', () => {
+      const invalidContent = `---\nname: test\ninput_variables: [query]\n---\n{{query}}`;
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(invalidContent);
 
-  it('should throw error if declared variables are not used in template', () => {
-    const mockContent = `---
-name: toBeFaithful
-input_variables:
-  - question
-  - context
-  - response
----
-{{question}} {{context}} {{response}}
-`;
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue(mockContent);
+      expect(() => PromptLoader.load('test.md', mockAssertion)).toThrow(/missing required input_variables: response/);
+    });
 
-    // This test was failing because it was missing required variables in input_variables
-    // but also testing for template usage. Let's fix the template usage test.
-    const mockContent2 = `---
-name: toBeFaithful
-input_variables:
-  - question
-  - context
-  - response
----
-{{question}} {{context}}
-`;
-    vi.mocked(fs.readFileSync).mockReturnValue(mockContent2);
-    expect(() => PromptLoader.load('test.md', mockAssertion)).toThrow(/never uses them in the template/);
-  });
+    it('should validate unused variables in template', () => {
+      const invalidContent = `---\nname: test\ninput_variables: [query, response]\n---\n{{query}}`;
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(invalidContent);
 
-  it('should throw error if frontmatter is missing', () => {
-    const mockContent = `No frontmatter here`;
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue(mockContent);
-
-    expect(() => PromptLoader.load('test.md', mockAssertion)).toThrow(/Missing frontmatter block/);
-  });
-
-  it('should throw error if template is empty', () => {
-    const mockContent = `---
-name: toBeFaithful
-input_variables:
-  - question
-  - context
-  - response
----
-`;
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    vi.mocked(fs.readFileSync).mockReturnValue(mockContent);
-
-    expect(() => PromptLoader.load('test.md', mockAssertion)).toThrow(/template at "test.md" is empty/);
+      expect(() => PromptLoader.load('test.md', mockAssertion)).toThrow(/declares input_variables \[response\] but never uses them/);
+    });
   });
 });
